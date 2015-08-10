@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptInject.BasicExample", "CryptInject.BasicExample\CryptInject.BasicExample.csproj", "{EECF4506-9BB6-4C14-984E-2A926D74E75D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptInject", "CryptInject\CryptInject.csproj", "{0CE39319-C759-4674-B82E-14EA7A95698C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{2F39CA17-8246-4047-B3FE-E2B68ECFE715}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptInject.WpfExample", "CryptInject.WpfExample\CryptInject.WpfExample.csproj", "{E13EB580-42D3-44BE-860F-DC7A005467A0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptInject.EntityFrameworkExample", "CryptInject.EntityFrameworkExample\CryptInject.EntityFrameworkExample.csproj", "{EA2DABA7-C0E6-4AD3-9688-5CE4BDBDB747}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EECF4506-9BB6-4C14-984E-2A926D74E75D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EECF4506-9BB6-4C14-984E-2A926D74E75D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EECF4506-9BB6-4C14-984E-2A926D74E75D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{EECF4506-9BB6-4C14-984E-2A926D74E75D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EECF4506-9BB6-4C14-984E-2A926D74E75D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EECF4506-9BB6-4C14-984E-2A926D74E75D}.Release|x86.ActiveCfg = Release|Any CPU
+		{0CE39319-C759-4674-B82E-14EA7A95698C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0CE39319-C759-4674-B82E-14EA7A95698C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0CE39319-C759-4674-B82E-14EA7A95698C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{0CE39319-C759-4674-B82E-14EA7A95698C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0CE39319-C759-4674-B82E-14EA7A95698C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0CE39319-C759-4674-B82E-14EA7A95698C}.Release|x86.ActiveCfg = Release|Any CPU
+		{E13EB580-42D3-44BE-860F-DC7A005467A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E13EB580-42D3-44BE-860F-DC7A005467A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E13EB580-42D3-44BE-860F-DC7A005467A0}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E13EB580-42D3-44BE-860F-DC7A005467A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E13EB580-42D3-44BE-860F-DC7A005467A0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E13EB580-42D3-44BE-860F-DC7A005467A0}.Release|x86.ActiveCfg = Release|Any CPU
+		{EA2DABA7-C0E6-4AD3-9688-5CE4BDBDB747}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA2DABA7-C0E6-4AD3-9688-5CE4BDBDB747}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA2DABA7-C0E6-4AD3-9688-5CE4BDBDB747}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{EA2DABA7-C0E6-4AD3-9688-5CE4BDBDB747}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EA2DABA7-C0E6-4AD3-9688-5CE4BDBDB747}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EA2DABA7-C0E6-4AD3-9688-5CE4BDBDB747}.Release|x86.ActiveCfg = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
