@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
 
@@ -25,7 +23,8 @@ namespace CryptInject.Keys.Builtin
             TripleDes.Padding = PaddingMode.PKCS7;
             try
             {
-                Transform(new byte[]{0,1,2,3,4}, TripleDes.CreateEncryptor(GetKey(key), GetIV(key)));
+                TripleDes.GenerateIV();
+                Transform(new byte[]{0,1,2,3,4}, TripleDes.CreateEncryptor(key, TripleDes.IV));
             }
             catch (Exception ex)
             {
@@ -49,25 +48,19 @@ namespace CryptInject.Keys.Builtin
             tripleDes.Padding = PaddingMode.PKCS7;
             tripleDes.BlockSize = blockSize;
             tripleDes.GenerateKey();
-            tripleDes.GenerateIV();
 
-            var keyData = new List<byte>();
-            keyData.AddRange(BitConverter.GetBytes((short)tripleDes.Key.Length));
-            keyData.AddRange(tripleDes.Key);
-            keyData.AddRange(BitConverter.GetBytes((short)tripleDes.IV.Length));
-            keyData.AddRange(tripleDes.IV);
-
-            return new TripleDesEncryptionKey(keyData.ToArray(), cipherMode, chainedInnerKey);
+            return new TripleDesEncryptionKey(tripleDes.Key, cipherMode, chainedInnerKey);
         }
 
         protected override byte[] Encrypt(PropertyInfo property, byte[] key, byte[] bytes)
         {
-            return Transform(bytes, TripleDes.CreateEncryptor(GetKey(key), GetIV(key)));
+            TripleDes.GenerateIV();
+            return CreateBinaryFrame(TripleDes.IV, Transform(bytes, TripleDes.CreateEncryptor(key, TripleDes.IV)));
         }
 
         protected override byte[] Decrypt(PropertyInfo property, byte[] key, byte[] bytes)
         {
-            return Transform(bytes, TripleDes.CreateDecryptor(GetKey(key), GetIV(key)));
+            return Transform(ExtractBinaryFrame(bytes)[1], TripleDes.CreateDecryptor(key, ExtractBinaryFrame(bytes)[0]));
         }
 
         private byte[] Transform(byte[] buffer, ICryptoTransform transform)
@@ -78,18 +71,6 @@ namespace CryptInject.Keys.Builtin
                 cs.Write(buffer, 0, buffer.Length);
             }
             return ms.ToArray();
-        }
-
-        private byte[] GetKey(byte[] keyData)
-        {
-            var keyLen = BitConverter.ToInt16(keyData, 0);
-            return keyData.Skip(2).Take(keyLen).ToArray();
-        }
-        private byte[] GetIV(byte[] keyData)
-        {
-            var keyLen = BitConverter.ToInt16(keyData, 0);
-            var ivLen = BitConverter.ToInt16(keyData, 2 + keyLen);
-            return keyData.Skip(2 + keyLen + 2).Take(ivLen).ToArray();
         }
 
         protected override byte[] ExportData

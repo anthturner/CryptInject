@@ -17,7 +17,7 @@ namespace CryptInject.Keys
 
         protected EncryptionKey(byte[] key, EncryptionKey chainedInnerKey)
         {
-            ResetKey(key);
+            SetKey(key);
             ChainedInnerKey = chainedInnerKey;
         }
 
@@ -46,7 +46,11 @@ namespace CryptInject.Keys
             return result;
         }
 
-        protected void ResetKey(byte[] key)
+        /// <summary>
+        /// Set the key material to a given byte array
+        /// </summary>
+        /// <param name="key">Key material</param>
+        protected void SetKey(byte[] key)
         {
             if (key == null || key.Length == 0)
             {
@@ -124,9 +128,90 @@ namespace CryptInject.Keys
             // no inner key
             var encryptionKey = (EncryptionKey) Activator.CreateInstance(Type.GetType(type));
             encryptionKey.ExportData = state;
-            encryptionKey.ResetKey(key);
+            encryptionKey.SetKey(key);
             encryptionKey.ChainedInnerKey = innerKey;
             return encryptionKey;
+        }
+
+        /// <summary>
+        /// Extract a frame that is stored in the key
+        /// </summary>
+        /// <param name="frame">Byte array frame</param>
+        /// <returns>List of fields in the frame</returns>
+        protected static List<byte[]> ExtractBinaryFrame(byte[] frame)
+        {
+            var fields = new List<byte[]>();
+            var position = 1;
+            while (position < frame.Length-1)
+            {
+                int length = 0;
+                switch ((int)frame[0])
+                {
+                    case 1: // byte
+                        length = (int)frame[position];
+                        break;
+                    case 2: // short
+                        length = BitConverter.ToInt16(frame, position);
+                        break;
+                    case 4: // int
+                        length = BitConverter.ToInt32(frame, position);
+                        break;
+                    case 8: // long
+                        length = BitConverter.ToInt32(frame, position);
+                        break;
+                    default:
+                        throw new Exception("Frame preamble must be 1, 2, 4, or 8. This may be corrupt.");
+                }
+
+                var frameData = frame.Skip(position + (int) frame[0]).Take(length).ToArray();
+                fields.Add(frameData);
+                position += (int)frame[0] + frameData.Length;
+            }
+            return fields;
+        }
+
+        /// <summary>
+        /// Create a frame to be stored with the key
+        /// </summary>
+        /// <param name="fields">Fields to store in frame</param>
+        /// <returns>Byte array frame</returns>
+        protected static byte[] CreateBinaryFrame(params byte[][] fields)
+        {
+            var maxLen = fields.Max(f => f.Length);
+            var bytes = 0;
+            if (maxLen < byte.MaxValue)
+                bytes = 1;
+            else if (maxLen < short.MaxValue)
+                bytes = 2;
+            else if (maxLen < int.MaxValue)
+                bytes = 4;
+            else if (maxLen < long.MaxValue)
+                bytes = 8;
+            else
+                throw new ArgumentOutOfRangeException("fields", "Length of one of the fields given is longer than the Int64 register");
+
+            var list = new List<byte>();
+            list.Add((byte)bytes);
+            foreach (var field in fields)
+            {
+                switch (bytes)
+                {
+                    case 1: // byte
+                        list.Add((byte)field.Length);
+                        break;
+                    case 2: // short
+                        list.AddRange(BitConverter.GetBytes((short)field.Length));
+                        break;
+                    case 4: // int
+                        list.AddRange(BitConverter.GetBytes((int)field.Length));
+                        break;
+                    case 8: // long
+                        list.AddRange(BitConverter.GetBytes((long)field.Length));
+                        break;
+                }
+                list.AddRange(field);
+            }
+            return list.ToArray();
         }
 
         /// <summary>

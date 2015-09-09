@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
 
@@ -22,7 +20,8 @@ namespace CryptInject.Keys.Builtin
             Rijndael.BlockSize = 128; // Force adherence to AES
             try
             {
-                Transform(new byte[] { 0, 1, 2, 3, 4 }, Rijndael.CreateEncryptor(GetKey(key), GetIV(key)));
+                Rijndael.GenerateIV();
+                Transform(new byte[] {0, 1, 2, 3, 4}, Rijndael.CreateEncryptor(key, Rijndael.IV));
             }
             catch (Exception ex)
             {
@@ -46,25 +45,19 @@ namespace CryptInject.Keys.Builtin
             var rijndael = new RijndaelManaged();
             rijndael.BlockSize = 128;
             rijndael.GenerateKey();
-            rijndael.GenerateIV();
 
-            var keyData = new List<byte>();
-            keyData.AddRange(BitConverter.GetBytes((short)rijndael.Key.Length));
-            keyData.AddRange(rijndael.Key);
-            keyData.AddRange(BitConverter.GetBytes((short)rijndael.IV.Length));
-            keyData.AddRange(rijndael.IV);
-
-            return new AesEncryptionKey(keyData.ToArray(), chainedInnerKey);
+            return new AesEncryptionKey(rijndael.Key, chainedInnerKey);
         }
 
         protected override byte[] Encrypt(PropertyInfo property, byte[] key, byte[] bytes)
         {
-            return Transform(bytes, Rijndael.CreateEncryptor(GetKey(key), GetIV(key)));
+            Rijndael.GenerateIV();
+            return CreateBinaryFrame(Rijndael.IV, Transform(bytes, Rijndael.CreateEncryptor(key, Rijndael.IV)));
         }
 
         protected override byte[] Decrypt(PropertyInfo property, byte[] key, byte[] bytes)
         {
-            return Transform(bytes, Rijndael.CreateDecryptor(GetKey(key), GetIV(key)));
+            return Transform(ExtractBinaryFrame(bytes)[1], Rijndael.CreateDecryptor(key, ExtractBinaryFrame(bytes)[0]));
         }
 
         protected override byte[] ExportData { get {return new byte[0];} set {} }
@@ -77,18 +70,6 @@ namespace CryptInject.Keys.Builtin
                 cs.Write(buffer, 0, buffer.Length);
             }
             return ms.ToArray();
-        }
-
-        private byte[] GetKey(byte[] keyData)
-        {
-            var keyLen = BitConverter.ToInt16(keyData, 0);
-            return keyData.Skip(2).Take(keyLen).ToArray();
-        }
-        private byte[] GetIV(byte[] keyData)
-        {
-            var keyLen = BitConverter.ToInt16(keyData, 0);
-            var ivLen = BitConverter.ToInt16(keyData, 2 + keyLen);
-            return keyData.Skip(2 + keyLen + 2).Take(ivLen).ToArray();
         }
     }
 }
