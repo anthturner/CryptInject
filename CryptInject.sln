@@ -16,7 +16,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptInject.WpfExample", "C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptInject.EntityFrameworkExample", "CryptInject.EntityFrameworkExample\CryptInject.EntityFrameworkExample.csproj", "{EA2DABA7-C0E6-4AD3-9688-5CE4BDBDB747}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptInject.NHibernateExample", "NHibernateExample\CryptInject.NHibernateExample.csproj", "{809C4825-3FC4-462D-A0F7-28CEEE879563}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptInject.NHibernateExample", "CryptInject.NHibernateExample\CryptInject.NHibernateExample.csproj", "{809C4825-3FC4-462D-A0F7-28CEEE879563}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
