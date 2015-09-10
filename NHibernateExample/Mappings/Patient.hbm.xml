@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" 
+                   assembly="DynamicProxyGenAssembly2" 
+                   namespace="Castle.Proxies">
+  
+  <class name="PatientProxy" table="Patients">
+    <id name="PatientId">
+      <generator class="guid" />
+    </id>
+    <property name="_encStored_FirstName" />
+    <property name="_encStored_LastName" />
+    <property name="_encStored_SSN" />
+    <property name="_encStored_DOB" />
+    <property name="_encStored_Glucose" />
+    <property name="_encStored_CPeptide" />
+    <property name="_encStored_ALT" />
+    <property name="_encStored_AST" />
+    <property name="_encStored_BMI" />
+    <property name="_encStored_HDL" />
+    <property name="Collected" />
+  </class>
+  
+</hibernate-mapping>

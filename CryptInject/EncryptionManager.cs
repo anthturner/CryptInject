@@ -16,6 +16,15 @@ namespace CryptInject
         {
             ProxiedTypes = new List<ProxyEncapsulatedType>();
             Keyring = new Keyring();
+
+            AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
+            {
+                if (args.Name.StartsWith("DynamicProxyGenAssembly2") && ProxiedTypes.Count > 0)
+                {
+                    return ProxiedTypes.First().GetProxyType().Assembly;
+                }
+                return null;
+            };
         }
 
         /// <summary>

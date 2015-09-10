@@ -16,6 +16,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptInject.WpfExample", "C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptInject.EntityFrameworkExample", "CryptInject.EntityFrameworkExample\CryptInject.EntityFrameworkExample.csproj", "{EA2DABA7-C0E6-4AD3-9688-5CE4BDBDB747}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptInject.NHibernateExample", "NHibernateExample\CryptInject.NHibernateExample.csproj", "{809C4825-3FC4-462D-A0F7-28CEEE879563}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,6 +50,12 @@ Global
 		{EA2DABA7-C0E6-4AD3-9688-5CE4BDBDB747}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EA2DABA7-C0E6-4AD3-9688-5CE4BDBDB747}.Release|Any CPU.Build.0 = Release|Any CPU
 		{EA2DABA7-C0E6-4AD3-9688-5CE4BDBDB747}.Release|x86.ActiveCfg = Release|Any CPU
+		{809C4825-3FC4-462D-A0F7-28CEEE879563}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{809C4825-3FC4-462D-A0F7-28CEEE879563}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{809C4825-3FC4-462D-A0F7-28CEEE879563}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{809C4825-3FC4-462D-A0F7-28CEEE879563}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{809C4825-3FC4-462D-A0F7-28CEEE879563}.Release|Any CPU.Build.0 = Release|Any CPU
+		{809C4825-3FC4-462D-A0F7-28CEEE879563}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
