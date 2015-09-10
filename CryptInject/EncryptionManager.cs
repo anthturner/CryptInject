@@ -169,11 +169,11 @@ namespace CryptInject
 
             foreach (var prop in obj.GetType().GetProperties())
             {
-                var val = prop.GetValue(obj);
+                var val = prop.GetValue(obj, null);
                 if (val != null)
                     types.Add(val.GetType());
 
-                if (prop.PropertyType.GetProperties().Any())
+                if (prop.PropertyType.GetProperties().Any() && prop.PropertyType != typeof(string))
                     types.AddRange(GetKnownTypes(val));
             }
 
