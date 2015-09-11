@@ -26,7 +26,7 @@ namespace CryptInject.Tests
             {
                 testStream.Seek(0, SeekOrigin.Begin); // rewind
 
-                var dc = new DataContractSerializer(testStream.GetType(), EncryptionManager.GetKnownTypes(testStream));
+                var dc = new DataContractSerializer(EncryptionManager.GetProxyType(typeof(TestableDataContract)));
                 return (TestableDataContract)dc.ReadObject(testStream);
             }
             );

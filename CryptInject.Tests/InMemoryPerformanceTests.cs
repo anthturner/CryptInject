@@ -124,7 +124,10 @@ namespace CryptInject.Tests
         {
             var sw = new Stopwatch();
             sw.Start();
-            a.Invoke();
+            for (int i = 0; i < 100000; i++)
+            {
+                a.Invoke();
+            }
             sw.Stop();
             Trace.WriteLine(sw.Elapsed);
         }
