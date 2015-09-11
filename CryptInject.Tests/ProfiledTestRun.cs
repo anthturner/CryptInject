@@ -21,6 +21,7 @@ namespace CryptInject.Tests
             var times = new List<TimeSpan>();
             var sw = new Stopwatch();
             var testObject = GenerateSampleObject(useEncryption);
+            EncryptionManager.Keyring.Lock();
             for (int i = 0; i < runs; i++)
             {
                 sw.Restart();
@@ -28,6 +29,7 @@ namespace CryptInject.Tests
                 sw.Stop();
                 times.Add(sw.Elapsed);
             }
+            EncryptionManager.Keyring.Unlock();
             return times;
         }
 
@@ -36,6 +38,7 @@ namespace CryptInject.Tests
             var times = new List<TimeSpan>();
             var sw = new Stopwatch();
             var testData = GenerateSampleSerializedData(useEncryption);
+            EncryptionManager.Keyring.Lock();
             for (int i = 0; i < runs; i++)
             {
                 sw.Restart();
@@ -43,12 +46,17 @@ namespace CryptInject.Tests
                 sw.Stop();
                 times.Add(sw.Elapsed);
             }
+            EncryptionManager.Keyring.Unlock();
             return times;
         }
         
         public TSerialized GenerateSampleSerializedData(bool useEncryption)
         {
-            return ProfiledSerializationFunction.Invoke(GenerateSampleObject(useEncryption));
+            var generatedObject = GenerateSampleObject(useEncryption);
+            EncryptionManager.Keyring.Lock();
+            var serializedData = ProfiledSerializationFunction.Invoke(generatedObject);
+            EncryptionManager.Keyring.Unlock();
+            return serializedData;
         }
 
         public TObject GenerateSampleObject(bool useEncryption)

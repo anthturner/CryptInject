@@ -19,7 +19,7 @@ namespace CryptInject.Tests
             var keyring = new Keyring();
             keyring.Add("AES", AesEncryptionKey.Create());
             keyring.Add("DES", TripleDesEncryptionKey.Create());
-            keyring.Add("AES-DES", AesEncryptionKey.Create());
+            keyring.Add("AES-DES", AesEncryptionKey.Create(TripleDesEncryptionKey.Create()));
             EncryptionManager.Keyring = keyring;
 
             BaseTestObject = new TestableDataContract();
@@ -27,6 +27,8 @@ namespace CryptInject.Tests
 
             GeneratedTestObject = EncryptionManager.Create<TestableDataContract>();
             GeneratedTestObject.Populate();
+
+            keyring.Unlock();
         }
 
         [TestMethod]

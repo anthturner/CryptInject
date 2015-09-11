@@ -52,14 +52,7 @@ namespace CryptInject.Tests
 
         [TestMethod]
         [TestCategory("Performance")]
-        public void BinaryFormatter_Serialize_10000_Average()
-        {
-            Trace.WriteLine(TimeSpan.FromMilliseconds(ProfiledSerializerStrategy.ProfileSerializationWorkflow(true, 10000).Average(t => t.TotalMilliseconds)));
-        }
-
-        [TestMethod]
-        [TestCategory("Performance")]
-        public void BinaryFormatter_Serialize_10000_Total()
+        public void BinaryFormatter_Serialize_10000()
         {
             Trace.WriteLine(TimeSpan.FromMilliseconds(ProfiledSerializerStrategy.ProfileSerializationWorkflow(true, 10000).Sum(t => t.TotalMilliseconds)));
         }
@@ -73,14 +66,7 @@ namespace CryptInject.Tests
 
         [TestMethod]
         [TestCategory("Performance")]
-        public void BinaryFormatter_SerializeBaseline_10000_Average()
-        {
-            Trace.WriteLine(TimeSpan.FromMilliseconds(ProfiledSerializerStrategy.ProfileSerializationWorkflow(false, 10000).Average(t => t.TotalMilliseconds)));
-        }
-
-        [TestMethod]
-        [TestCategory("Performance")]
-        public void BinaryFormatter_SerializeBaseline_10000_Total()
+        public void BinaryFormatter_SerializeBaseline_10000()
         {
             Trace.WriteLine(TimeSpan.FromMilliseconds(ProfiledSerializerStrategy.ProfileSerializationWorkflow(false, 10000).Sum(t => t.TotalMilliseconds)));
         }
@@ -94,14 +80,7 @@ namespace CryptInject.Tests
 
         [TestMethod]
         [TestCategory("Performance")]
-        public void BinaryFormatter_Deserialize_10000_Average()
-        {
-            Trace.WriteLine(TimeSpan.FromMilliseconds(ProfiledSerializerStrategy.ProfileDeserializationWorkflow(true, 10000).Average(t => t.TotalMilliseconds)));
-        }
-
-        [TestMethod]
-        [TestCategory("Performance")]
-        public void BinaryFormatter_Deserialize_10000_Total()
+        public void BinaryFormatter_Deserialize_10000()
         {
             Trace.WriteLine(TimeSpan.FromMilliseconds(ProfiledSerializerStrategy.ProfileDeserializationWorkflow(true, 10000).Sum(t => t.TotalMilliseconds)));
         }
@@ -115,14 +94,7 @@ namespace CryptInject.Tests
 
         [TestMethod]
         [TestCategory("Performance")]
-        public void BinaryFormatter_DeserializeBaseline_10000_Average()
-        {
-            Trace.WriteLine(TimeSpan.FromMilliseconds(ProfiledSerializerStrategy.ProfileDeserializationWorkflow(false, 10000).Average(t => t.TotalMilliseconds)));
-        }
-
-        [TestMethod]
-        [TestCategory("Performance")]
-        public void BinaryFormatter_DeserializeBaseline_10000_Total()
+        public void BinaryFormatter_DeserializeBaseline_10000()
         {
             Trace.WriteLine(TimeSpan.FromMilliseconds(ProfiledSerializerStrategy.ProfileDeserializationWorkflow(false, 10000).Sum(t => t.TotalMilliseconds)));
         }
