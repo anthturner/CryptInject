@@ -50,8 +50,15 @@ namespace CryptInject
 
         internal static IEnumerable<PropertyInfo> GetEncryptionEligibleProperties(Type type)
         {
-            return type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic)
-                .Where(p => p.GetCustomAttribute<EncryptableAttribute>() != null && p.GetGetMethod().IsVirtual && p.GetSetMethod().IsVirtual);
+            var eligibleProperties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic).Where(p => p.GetCustomAttribute<EncryptableAttribute>() != null).ToList();
+            var propertiesMarkedWithoutVirtual = eligibleProperties.Where(prop => !prop.GetMethod.IsVirtual || !prop.SetMethod.IsVirtual).ToList();
+            if (propertiesMarkedWithoutVirtual.Count > 0)
+            {
+                throw new Exception("All properties marked with [Encryptable] must also be marked virtual:" + Environment.NewLine +
+                    string.Join(Environment.NewLine + Environment.NewLine, propertiesMarkedWithoutVirtual.Select(p => p.DeclaringType.Name + "." + p.Name)));
+            }
+
+            return eligibleProperties.Where(p => p.GetGetMethod().IsVirtual && p.GetSetMethod().IsVirtual);
         }
 
         #region Type Generation

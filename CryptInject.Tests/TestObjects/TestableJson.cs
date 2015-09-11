@@ -8,39 +8,39 @@ namespace CryptInject.Tests.TestObjects
     {
         [Encryptable("AES")]
         [JsonProperty]
-        public string AesString { get; set; }
+        public virtual string AesString { get; set; }
 
         [Encryptable("AES")]
         [JsonProperty]
-        public int AesInteger { get; set; }
+        public virtual int AesInteger { get; set; }
 
         [Encryptable("AES")]
         [JsonProperty]
-        public Guid AesGuid { get; set; }
+        public virtual Guid AesGuid { get; set; }
 
         [Encryptable("DES")]
         [JsonProperty]
-        public string DesString { get; set; }
+        public virtual string DesString { get; set; }
 
         [Encryptable("DES")]
         [JsonProperty]
-        public int DesInteger { get; set; }
+        public virtual int DesInteger { get; set; }
 
         [Encryptable("DES")]
         [JsonProperty]
-        public Guid DesGuid { get; set; }
+        public virtual Guid DesGuid { get; set; }
 
         [Encryptable("AES-DES")]
         [JsonProperty]
-        public string AesDesString { get; set; }
+        public virtual string AesDesString { get; set; }
 
         [Encryptable("AES-DES")]
         [JsonProperty]
-        public int AesDesInteger { get; set; }
+        public virtual int AesDesInteger { get; set; }
 
         [Encryptable("AES-DES")]
         [JsonProperty]
-        public Guid AesDesGuid { get; set; }
+        public virtual Guid AesDesGuid { get; set; }
 
         public string UnencryptedString { get; set; }
 

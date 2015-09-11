@@ -7,31 +7,31 @@ namespace CryptInject.Tests.TestObjects
     public class TestableBinaryFormatter : ITestable
     {
         [Encryptable("AES")]
-        public string AesString { get; set; }
+        public virtual string AesString { get; set; }
 
         [Encryptable("AES")]
-        public int AesInteger { get; set; }
+        public virtual int AesInteger { get; set; }
 
         [Encryptable("AES")]
-        public Guid AesGuid { get; set; }
+        public virtual Guid AesGuid { get; set; }
 
         [Encryptable("DES")]
-        public string DesString { get; set; }
+        public virtual string DesString { get; set; }
 
         [Encryptable("DES")]
-        public int DesInteger { get; set; }
+        public virtual int DesInteger { get; set; }
 
         [Encryptable("DES")]
-        public Guid DesGuid { get; set; }
+        public virtual Guid DesGuid { get; set; }
 
         [Encryptable("AES-DES")]
-        public string AesDesString { get; set; }
+        public virtual string AesDesString { get; set; }
 
         [Encryptable("AES-DES")]
-        public int AesDesInteger { get; set; }
+        public virtual int AesDesInteger { get; set; }
 
         [Encryptable("AES-DES")]
-        public Guid AesDesGuid { get; set; }
+        public virtual Guid AesDesGuid { get; set; }
 
         public string UnencryptedString { get; set; }
 
