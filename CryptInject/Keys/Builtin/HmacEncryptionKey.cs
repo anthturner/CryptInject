@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
 
@@ -38,22 +36,16 @@ namespace CryptInject.Keys.Builtin
             {
                 alg.Key = key;
                 var signature = alg.ComputeHash(bytes);
-                
-                var returnBytes = new List<byte>(2 + signature.Length + bytes.Length);
-                returnBytes.AddRange(BitConverter.GetBytes((short) signature.Length));
-                returnBytes.AddRange(signature);
-                returnBytes.AddRange(bytes);
 
-                return returnBytes.ToArray();
+                return CreateBinaryFrame(signature, bytes);
             }
         }
 
         protected override byte[] Decrypt(PropertyInfo property, byte[] key, byte[] bytes)
         {
-            var signatureLength = BitConverter.ToInt16(bytes, 0);
-            var signature = bytes.Skip(2).Take(signatureLength).ToArray();
-            var data = bytes.Skip(2 + signatureLength).ToArray();
-
+            var signature = ExtractBinaryFrame(bytes)[0];
+            var data = ExtractBinaryFrame(bytes)[1];
+            
             using (var alg = GetAlgorithm())
             {
                 alg.Key = key;

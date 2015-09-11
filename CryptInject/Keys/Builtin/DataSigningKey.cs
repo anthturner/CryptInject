@@ -36,19 +36,13 @@ namespace CryptInject.Keys.Builtin
             byte[] hash = sha1.ComputeHash(bytes);
             var signature = csp.SignHash(hash, CryptoConfig.MapNameToOID("SHA1"));
 
-            var returnBytes = new List<byte>(2 + signature.Length + bytes.Length);
-            returnBytes.AddRange(BitConverter.GetBytes((short) signature.Length));
-            returnBytes.AddRange(signature);
-            returnBytes.AddRange(bytes);
-
-            return returnBytes.ToArray();
+            return CreateBinaryFrame(signature, bytes);
         }
 
         protected override byte[] Decrypt(PropertyInfo property, byte[] key, byte[] bytes)
         {
-            var signatureLength = BitConverter.ToInt16(bytes, 0);
-            var signature = bytes.Skip(2).Take(signatureLength).ToArray();
-            var data = bytes.Skip(2 + signatureLength).ToArray();
+            var signature = ExtractBinaryFrame(bytes)[0];
+            var data = ExtractBinaryFrame(bytes)[1];
 
             var csp = (RSACryptoServiceProvider) SigningCertificate.PublicKey.Key;
 
