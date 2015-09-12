@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -13,16 +15,6 @@ namespace CryptInject
         public delegate object ProxyDeserializeFunctionDelegate(PropertyInfo property, byte[] serializedObjectData);
 
         /// <summary>
-        /// Function to invoke when the proxy is serializing a property for encryption (default uses BinaryFormatter)
-        /// </summary>
-        public event ProxySerializeFunctionDelegate ProxySerializeFunction;
-
-        /// <summary>
-        /// Function to invoke when the proxy is deserializing a property after decryption (default uses BinaryFormatter)
-        /// </summary>
-        public event ProxyDeserializeFunctionDelegate ProxyDeserializeFunction;
-
-        /// <summary>
         /// Whether or not to throw an Exception when data cannot be accessed during a get. Otherwise, default(T) will be returned.
         /// </summary>
         public bool ThrowExceptionOnAccessorFailure { get; set; }
@@ -32,34 +24,46 @@ namespace CryptInject
         /// </summary>
         public bool ThrowExceptionOnMutatorFailure { get; set; }
 
-        public EncryptionProxyConfiguration()
+        private ProxySerializeFunctionDelegate ProxySerializeFunction { get; set; }
+        private ProxyDeserializeFunctionDelegate ProxyDeserializeFunction { get; set; }
+
+        private Dictionary<string, string> PropertyKeyNameCache { get; set; }
+
+        private static ProxySerializeFunctionDelegate DefaultProxySerializeFunction = (property, serializableObject) =>
         {
+            var bf = new BinaryFormatter();
+            var ms = new MemoryStream();
+            bf.Serialize(ms, serializableObject);
+            ms.Seek(0, SeekOrigin.Begin);
+            return ms.ToArray();
+        };
+
+        private static ProxyDeserializeFunctionDelegate DefaultProxyDeserializeFunction = (property, bytes) =>
+        {
+            var bf = new BinaryFormatter();
+            var ms = new MemoryStream(bytes);
+            ms.Seek(0, SeekOrigin.Begin);
+            return bf.Deserialize(ms);
+        };
+
+        public EncryptionProxyConfiguration(ProxySerializeFunctionDelegate serializeFunction = null, ProxyDeserializeFunctionDelegate deserializeFunction = null)
+        {
+            if (serializeFunction == null)
+                serializeFunction = DefaultProxySerializeFunction;
+            if (deserializeFunction == null)
+                deserializeFunction = DefaultProxyDeserializeFunction;
+
+            ProxySerializeFunction = serializeFunction;
+            ProxyDeserializeFunction = deserializeFunction;
+
+            PropertyKeyNameCache = new Dictionary<string, string>();
             ThrowExceptionOnAccessorFailure = false;
             ThrowExceptionOnMutatorFailure = false;
-
-            ProxySerializeFunction += (property, serializableObject) =>
-            {
-                var bf = new BinaryFormatter();
-                var ms = new MemoryStream();
-                bf.Serialize(ms, serializableObject);
-                ms.Seek(0, SeekOrigin.Begin);
-                return ms.ToArray();
-            };
-            ProxyDeserializeFunction += (property, bytes) =>
-            {
-                var bf = new BinaryFormatter();
-                var ms = new MemoryStream(bytes);
-                ms.Seek(0, SeekOrigin.Begin);
-                return bf.Deserialize(ms);
-            };
         }
 
         #region Cryptography Invocation
         internal object AccessValue(PropertyInfo property, byte[] bytes)
         {
-            if (ProxySerializeFunction == null)
-                throw new Exception("ProxyDeserializeFunction not bound.");
-
             if (bytes != null && bytes.Length > 0)
             {
                 var keyDescriptor = GetEncryptionKey(property);
@@ -116,7 +120,7 @@ namespace CryptInject
             return null;
         }
 
-        private static KeyDescriptor GetEncryptionKey(PropertyInfo propertyInfo)
+        private KeyDescriptor GetEncryptionKey(PropertyInfo propertyInfo)
         {
             var keyAlias = GetEncryptionKeyName(propertyInfo);
             if (keyAlias != null && EncryptionManager.Keyring.HasKey(keyAlias))
@@ -124,11 +128,19 @@ namespace CryptInject
             return null;
         }
 
-        private static string GetEncryptionKeyName(PropertyInfo propertyInfo)
+        private string GetEncryptionKeyName(PropertyInfo propertyInfo)
         {
+            if (PropertyKeyNameCache.ContainsKey(propertyInfo.Name))
+            {
+                return PropertyKeyNameCache[propertyInfo.Name];
+            }
+
             var encryptionAttribute = propertyInfo.GetCustomAttribute<EncryptableAttribute>();
             if (encryptionAttribute == null)
                 return null;
+
+            PropertyKeyNameCache.Add(propertyInfo.Name, encryptionAttribute.KeyAlias);
+
             return encryptionAttribute.KeyAlias;
         }
         #endregion
