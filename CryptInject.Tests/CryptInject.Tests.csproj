@@ -36,6 +36,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL" />
+    <Reference Include="protobuf-net">
+      <HintPath>..\packages\protobuf-net.2.0.0.668\lib\net40\protobuf-net.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.XML" />
@@ -54,11 +57,13 @@
   </Choose>
   <ItemGroup>
     <Compile Include="BinaryFormatterPerformanceTests.cs" />
+    <Compile Include="FunctionalTests.cs" />
     <Compile Include="JsonPerformanceTests.cs" />
     <Compile Include="DataContractPerformanceTests.cs" />
     <Compile Include="InMemoryPerformanceTests.cs" />
     <Compile Include="ProfiledTestRun.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestObjects\FunctionallyCompleteTestable.cs" />
     <Compile Include="TestObjects\ITestable.cs" />
     <Compile Include="TestObjects\TestableBinaryFormatter.cs" />
     <Compile Include="TestObjects\TestableJson.cs" />
@@ -69,6 +74,9 @@
       <Project>{0CE39319-C759-4674-B82E-14EA7A95698C}</Project>
       <Name>CryptInject</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.Reflection;
 using CryptInject.Tests.TestObjects;
+using ProtoBuf;
 
 namespace CryptInject.Tests
 {
@@ -14,6 +17,22 @@ namespace CryptInject.Tests
         {
             ProfiledSerializationFunction = profiledSerializationFunction;
             ProfiledDeserializationFunction = profiledDeserializationFunction;
+        }
+
+        static ProfiledTestRun()
+        {
+            var options = new EncryptionProxyConfiguration((property, serializableObject) =>
+            {
+                var memoryStream = new MemoryStream();
+                Serializer.Serialize(memoryStream, serializableObject);
+                return memoryStream.ToArray();
+            }, (property, data) =>
+            {
+                var genericInvoke = typeof(Serializer).GetMethod("Deserialize", BindingFlags.Static | BindingFlags.Public).MakeGenericMethod(property.PropertyType);
+                return genericInvoke.Invoke(null, new object[] { new MemoryStream(data) });
+            });
+
+            EncryptionManager.PreloadProxyTypes(options);
         }
 
         public List<TimeSpan> ProfileSerializationWorkflow(bool useEncryption, int runs = 1)
@@ -61,7 +80,17 @@ namespace CryptInject.Tests
 
         public TObject GenerateSampleObject(bool useEncryption)
         {
-            var testObject = useEncryption ? EncryptionManager.Create<TObject>() : Activator.CreateInstance<TObject>();
+            var options = new EncryptionProxyConfiguration((property, serializableObject) =>
+            {
+                var memoryStream = new MemoryStream();
+                Serializer.Serialize(memoryStream, serializableObject);
+                return memoryStream.ToArray();
+            }, (property, data) =>
+            {
+                var genericInvoke = typeof(Serializer).GetMethod("Deserialize", BindingFlags.Static | BindingFlags.Public).MakeGenericMethod(property.PropertyType);
+                return genericInvoke.Invoke(null, new object[] { new MemoryStream(data) });
+            });
+            var testObject = useEncryption ? EncryptionManager.Create<TObject>(options) : Activator.CreateInstance<TObject>();
             testObject.Populate();
             return testObject;
         }
