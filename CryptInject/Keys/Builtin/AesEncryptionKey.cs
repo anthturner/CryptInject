@@ -57,7 +57,8 @@ namespace CryptInject.Keys.Builtin
 
         protected override byte[] Decrypt(PropertyInfo property, byte[] key, byte[] bytes)
         {
-            return Transform(ExtractBinaryFrame(bytes)[1], Rijndael.CreateDecryptor(key, ExtractBinaryFrame(bytes)[0]));
+            var frame = ExtractBinaryFrame(bytes);
+            return Transform(frame[1], Rijndael.CreateDecryptor(key, frame[0]));
         }
 
         protected override byte[] ExportData { get {return new byte[0];} set {} }

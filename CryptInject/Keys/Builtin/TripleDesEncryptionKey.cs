@@ -60,7 +60,8 @@ namespace CryptInject.Keys.Builtin
 
         protected override byte[] Decrypt(PropertyInfo property, byte[] key, byte[] bytes)
         {
-            return Transform(ExtractBinaryFrame(bytes)[1], TripleDes.CreateDecryptor(key, ExtractBinaryFrame(bytes)[0]));
+            var frame = ExtractBinaryFrame(bytes);
+            return Transform(frame[1], TripleDes.CreateDecryptor(key, frame[0]));
         }
 
         private byte[] Transform(byte[] buffer, ICryptoTransform transform)

@@ -78,10 +78,15 @@ namespace CryptInject
             if (property.HasCache)
             {
                 cacheValue = property.GetCacheValue(proxyObject);
-                if (cacheValue != null && !cacheValue.Equals(CastReturnValue(property.Original, null)))
+                if (cacheValue == null)
+                {
+                    cacheValue = Configuration.AccessValue(property.Original, encryptedValue);
+                    property.SetCacheValue(proxyObject, cacheValue);
+                    
+                }
+                else if (!cacheValue.Equals(CastReturnValue(property.Original, null))) // todo: this is always false, we need to do better or reads on non-primitives will be slow
                 {
                     var encryptedCachedObject = Configuration.MutateValue(property.Original, cacheValue);
-                    // todo: this makes reads *very* heavy, can we somehow yank this?
                     property.SetBackingValue(proxyObject, encryptedCachedObject);
                 }
             }
@@ -107,13 +112,15 @@ namespace CryptInject
 
         internal override void ClearSensitiveData(object proxyObject)
         {
+            CleanupDeadReferences();
             Properties.Where(p => p.Value.HasCache)
                 .ForEach(p => p.Value.SetCacheValue(proxyObject, CastReturnValue(p.Value.Original, null)));
         }
 
         internal override void ClearSensitiveData(string keyAlias)
         {
-            Instances.ForEach(i => ClearSensitiveData(i, keyAlias));
+            CleanupDeadReferences();
+            Instances.ForEach(i => ClearSensitiveData(i.Reference.Target, keyAlias));
         }
 
         internal override void ClearSensitiveData(object proxyObject, string keyAlias)
@@ -176,11 +183,11 @@ namespace CryptInject
 
             internal object GetCacheValue(object obj)
             {
-                return Cache.GetValue(obj);
+                return GetCacheProperty(obj).GetValue(obj, null);
             }
             internal void SetCacheValue(object obj, object value)
             {
-                Cache.SetValue(obj, value);
+                GetCacheProperty(obj).SetValue(obj, value, null);
             }
 
             internal byte[] GetBackingValue(object obj)
@@ -199,6 +206,15 @@ namespace CryptInject
                     return Backing;
                 else
                     return obj.GetType().GetProperty(Backing.Name, Backing.PropertyType);
+            }
+
+            private PropertyInfo GetCacheProperty(object obj)
+            {
+                // Handle deserialization cases where the CLR won't unify identical types (mumble mumble)
+                if (obj.GetType().Equals(Cache.DeclaringType))
+                    return Cache;
+                else
+                    return obj.GetType().GetProperty(Cache.Name, Cache.PropertyType);
             }
         }
 

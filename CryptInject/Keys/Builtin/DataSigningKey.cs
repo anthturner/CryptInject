@@ -41,8 +41,9 @@ namespace CryptInject.Keys.Builtin
 
         protected override byte[] Decrypt(PropertyInfo property, byte[] key, byte[] bytes)
         {
-            var signature = ExtractBinaryFrame(bytes)[0];
-            var data = ExtractBinaryFrame(bytes)[1];
+            var frame = ExtractBinaryFrame(bytes);
+            var signature = frame[0];
+            var data = frame[1];
 
             var csp = (RSACryptoServiceProvider) SigningCertificate.PublicKey.Key;
 
