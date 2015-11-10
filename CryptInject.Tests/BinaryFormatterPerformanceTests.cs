@@ -17,7 +17,7 @@ namespace CryptInject.Tests
             testObj =>
             {
                 var memoryStream = new MemoryStream();
-                var binaryFormatter = new BinaryFormatter() { Binder = new EncryptionProxySerializationBinder() };
+                var binaryFormatter = new BinaryFormatter();
                 binaryFormatter.Serialize(memoryStream, testObj);
 
                 Assert.IsTrue(memoryStream.Length > 0);
@@ -28,19 +28,20 @@ namespace CryptInject.Tests
             {
                 testStream.Seek(0, SeekOrigin.Begin); // rewind
                 
-                var binaryFormatter = new BinaryFormatter() { Binder = new EncryptionProxySerializationBinder() };
+                var binaryFormatter = new BinaryFormatter();
                 return (TestableBinaryFormatter)binaryFormatter.Deserialize(testStream);
-            }
+            },
+            GeneratedKeyring
             );
+
+        private static Keyring GeneratedKeyring = new Keyring();
 
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
         {
-            var keyring = new Keyring();
-            keyring.Add("AES", AesEncryptionKey.Create());
-            keyring.Add("DES", TripleDesEncryptionKey.Create());
-            keyring.Add("AES-DES", AesEncryptionKey.Create());
-            EncryptionManager.Keyring = keyring;
+            GeneratedKeyring.Add("AES", AesEncryptionKey.Create());
+            GeneratedKeyring.Add("DES", TripleDesEncryptionKey.Create());
+            GeneratedKeyring.Add("AES-DES", AesEncryptionKey.Create());
         }
 
         [TestMethod]

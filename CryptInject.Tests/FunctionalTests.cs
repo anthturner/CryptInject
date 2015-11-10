@@ -1,65 +1,50 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using CryptInject.Keys;
 using CryptInject.Keys.Builtin;
 using CryptInject.Tests.TestObjects;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using ProtoBuf;
-using ProtoBuf.Meta;
 
 namespace CryptInject.Tests
 {
     [TestClass]
     public class FunctionalTests
     {
-        [ClassInitialize]
-        public static void ClassInitialize(TestContext context)
-        {
-            Monitor.Enter(TestHelper.SerialExecutionLock);
-        }
+        private Keyring GeneratedKeyring { get; set; }
 
-        [ClassCleanup]
-        public static void ClassCleanup()
+        [TestInitialize]
+        public void Initialize()
         {
-            Monitor.Exit(TestHelper.SerialExecutionLock);
+            GeneratedKeyring = new Keyring();
+            GeneratedKeyring.Add("AES-DES", AesEncryptionKey.Create(TripleDesEncryptionKey.Create()));
+            GeneratedKeyring.Add("DES", TripleDesEncryptionKey.Create());
+            GeneratedKeyring.Add("AES", AesEncryptionKey.Create());
         }
 
         [TestMethod]
         public void Functional_RunsFullyCompleteObject()
         {
-            EncryptionManager.PreloadProxyTypes();
+            var functionallyCompleteObject = new FunctionallyCompleteTestable();
+            functionallyCompleteObject.Populate();
+
+            var encryptedObj = functionallyCompleteObject.AsEncrypted(GeneratedKeyring);
             
-            var keyring = new Keyring();
-            keyring.Add("AES-DES", AesEncryptionKey.Create(TripleDesEncryptionKey.Create()));
-            keyring.Add("DES", TripleDesEncryptionKey.Create());
-            keyring.Add("AES", AesEncryptionKey.Create());
-            EncryptionManager.Keyring = keyring;
+            GeneratedKeyring.Lock();
 
-            // Create a new instance of the object you're serializing (class for this is below)
-            var proxy = EncryptionManager.Create<FunctionallyCompleteTestable>();
-            proxy.Populate();
+            Assert.AreEqual(encryptedObj.String, default(string));
+            Assert.AreEqual(encryptedObj.Integer, default(int));
+            Assert.AreEqual(encryptedObj.Guid, default(Guid));
+            Assert.AreEqual(encryptedObj.Guid, default(Guid));
+            Assert.AreEqual(encryptedObj.SubObjectInstance, default(SubObject));
 
-            EncryptionManager.Keyring.Lock();
-
-            Assert.AreEqual(proxy.String, default(string));
-            Assert.AreEqual(proxy.Integer, default(int));
-            Assert.AreEqual(proxy.Guid, default(Guid));
-            Assert.AreEqual(proxy.Guid, default(Guid));
-            Assert.AreEqual(proxy.SubObjectInstance, default(SubObject));
-
-            var bf = new BinaryFormatter() {Binder = new EncryptionProxySerializationBinder()};
+            var bf = new BinaryFormatter();
 
             var ms = new MemoryStream();
-            bf.Serialize(ms, proxy);
+            bf.Serialize(ms, encryptedObj);
             ms.Seek(0, SeekOrigin.Begin);
 
-            EncryptionManager.Keyring.Unlock();
+            GeneratedKeyring.Unlock();
 
             var replaced = (FunctionallyCompleteTestable) bf.Deserialize(ms);
 

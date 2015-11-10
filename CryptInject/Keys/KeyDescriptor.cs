@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using CryptInject.Proxy;
 
 namespace CryptInject.Keys
 {
@@ -15,10 +16,11 @@ namespace CryptInject.Keys
         internal delegate void KeyLockChangedDelegate(bool locked);
         internal event KeyLockChangedDelegate KeyLockChanged;
 
-        internal KeyDescriptor(string name, EncryptionKey keyData)
+        internal KeyDescriptor(string name, EncryptionKey keyData, bool preLocked = false)
         {
             Name = name;
             KeyData = keyData;
+            _isLocked = preLocked;
         }
 
         /// <summary>
@@ -29,15 +31,15 @@ namespace CryptInject.Keys
             get { return _isLocked; }
             set
             {
+                _isLocked = value;
+
                 if (value)
                 {
-                    EncryptionManager.ProxiedTypes.ForEach(t => t.ClearSensitiveData(Name));
+                    EncryptedInstanceFactory.UpdateInstancesFromKeyring();
                 }
 
                 if (KeyLockChanged != null)
                     KeyLockChanged(value);
-
-                _isLocked = value;
             }
         }
 

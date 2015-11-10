@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Castle.Core.Internal;
 
 namespace CryptInject.Keys
@@ -14,21 +15,33 @@ namespace CryptInject.Keys
         public delegate void KeyringChangedDelegate();
         public event KeyringChangedDelegate KeyringChanged;
 
+        public static Keyring GlobalKeyring { get; set; }
+
+        internal bool ReadOnly { get; set; }
+
+        static Keyring()
+        {
+            GlobalKeyring = new Keyring();
+        }
+
         public Keyring()
         {
             Keys = new List<KeyDescriptor>();
         }
-        
+
         /// <summary>
         /// Adds a key to this keyring.
         /// </summary>
         /// <param name="name">Name of the key</param>
         /// <param name="key">Key encryption data</param>
-        public void Add(string name, EncryptionKey key)
+        /// <param name="preLocked">If the key should be locked immediately</param>
+        public void Add(string name, EncryptionKey key, bool preLocked = false)
         {
+            if (ReadOnly)
+                throw new Exception("Keyring is read-only.");
             if (Keys.Any(k => k.Name == name))
                 throw new Exception("Key already exists. If replacing, use Remove() first.");
-            var newKey = new KeyDescriptor(name, key);
+            var newKey = new KeyDescriptor(name, key, preLocked);
             newKey.KeyLockChanged += locked => { if (KeyringChanged != null) KeyringChanged(); };
             Keys.Add(newKey);
 
@@ -41,6 +54,8 @@ namespace CryptInject.Keys
         /// <param name="name">Name of key to remove</param>
         public void Remove(string name)
         {
+            if (ReadOnly)
+                throw new Exception("Keyring is read-only.");
             if (!Keys.Any(k => k.Name == name))
                 throw new Exception("Key not found.");
             Keys.RemoveAll(k => k.Name == name);
@@ -88,11 +103,13 @@ namespace CryptInject.Keys
         /// <param name="importableKeyring">External keyring to import from</param>
         public void Import(Keyring importableKeyring)
         {
+            if (ReadOnly)
+                throw new Exception("Keyring is read-only.");
             foreach (var key in importableKeyring.Keys)
             {
                 if (HasKey(key.Name))
                     continue;
-                Add(key.Name, key.KeyData);
+                Add(key.Name, key.KeyData, key.Locked);
             }
 
             if (KeyringChanged != null) KeyringChanged();
@@ -104,6 +121,8 @@ namespace CryptInject.Keys
         /// <param name="stream">Stream to import from</param>
         public void ImportFromStream(Stream stream)
         {
+            if (ReadOnly)
+                throw new Exception("Keyring is read-only.");
             var countBuffer = new byte[2];
             stream.Read(countBuffer, 0, 2);
             var count = BitConverter.ToInt16(countBuffer, 0);
@@ -169,8 +188,20 @@ namespace CryptInject.Keys
         /// </summary>
         public void Clear()
         {
+            if (ReadOnly)
+                throw new Exception("Keyring is read-only.");
             Keys.Clear();
             if (KeyringChanged != null) KeyringChanged();
+        }
+
+        public KeyDescriptor this[string name]
+        {
+            get
+            {
+                if (!HasKey(name))
+                    return null;
+                return Keys.FirstOrDefault(k => k.Name == name);
+            }
         }
 
         public IEnumerator<KeyDescriptor> GetEnumerator()

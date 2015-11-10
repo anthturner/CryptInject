@@ -19,18 +19,19 @@ namespace CryptInject.Tests
             },
             testString =>
             {
-                return (TestableJson)JsonConvert.DeserializeObject(testString, EncryptionManager.GetProxyType(typeof(TestableJson)), new JsonSerializerSettings() { Binder = new EncryptionProxySerializationBinder(), TypeNameHandling = TypeNameHandling.Auto });
-            }
+                return (TestableJson)JsonConvert.DeserializeObject(testString, typeof(TestableJson).GetEncryptedType(), new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto });
+            },
+            GeneratedKeyring
             );
+
+        private static Keyring GeneratedKeyring = new Keyring();
 
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
         {
-            var keyring = new Keyring();
-            keyring.Add("AES", AesEncryptionKey.Create());
-            keyring.Add("DES", TripleDesEncryptionKey.Create());
-            keyring.Add("AES-DES", AesEncryptionKey.Create());
-            EncryptionManager.Keyring = keyring;
+            GeneratedKeyring.Add("AES", AesEncryptionKey.Create());
+            GeneratedKeyring.Add("DES", TripleDesEncryptionKey.Create());
+            GeneratedKeyring.Add("AES-DES", AesEncryptionKey.Create());
         }
 
         [TestMethod]

@@ -13,22 +13,24 @@ namespace CryptInject.Tests
         private static TestableDataContract BaseTestObject { get; set; }
         private static TestableDataContract GeneratedTestObject { get; set; }
 
+        private static Keyring GeneratedKeyring { get; set; }
+
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
         {
-            var keyring = new Keyring();
-            keyring.Add("AES", AesEncryptionKey.Create());
-            keyring.Add("DES", TripleDesEncryptionKey.Create());
-            keyring.Add("AES-DES", AesEncryptionKey.Create(TripleDesEncryptionKey.Create()));
-            EncryptionManager.Keyring = keyring;
+            GeneratedKeyring = new Keyring();
+            GeneratedKeyring.Add("AES", AesEncryptionKey.Create());
+            GeneratedKeyring.Add("DES", TripleDesEncryptionKey.Create());
+            GeneratedKeyring.Add("AES-DES", AesEncryptionKey.Create(TripleDesEncryptionKey.Create()));
 
             BaseTestObject = new TestableDataContract();
             BaseTestObject.Populate();
 
-            GeneratedTestObject = EncryptionManager.Create<TestableDataContract>();
+            GeneratedTestObject = new TestableDataContract();
             GeneratedTestObject.Populate();
+            GeneratedTestObject.AsEncrypted();
 
-            keyring.Unlock();
+            GeneratedKeyring.Unlock();
         }
 
         [TestMethod]

@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
 using CryptInject.Keys;
+using CryptInject.Proxy;
 
 namespace CryptInject
 {
@@ -62,11 +62,11 @@ namespace CryptInject
         }
 
         #region Cryptography Invocation
-        internal object AccessValue(PropertyInfo property, byte[] bytes)
+        internal object AccessValue(EncryptedInstance instance, PropertyInfo property, byte[] bytes)
         {
             if (bytes != null && bytes.Length > 0)
             {
-                var keyDescriptor = GetEncryptionKey(property);
+                var keyDescriptor = GetEncryptionKey(instance, property);
                 if (keyDescriptor != null && !keyDescriptor.Locked)
                 {
                     byte[] decrypted;
@@ -90,14 +90,14 @@ namespace CryptInject
             return null;
         }
 
-        internal byte[] MutateValue(PropertyInfo property, object obj)
+        internal byte[] MutateValue(EncryptedInstance instance, PropertyInfo property, object obj)
         {
             if (ProxySerializeFunction == null)
                 throw new Exception("ProxySerializeFunction not bound.");
 
             if (obj != null)
             {
-                var keyDescriptor = GetEncryptionKey(property);
+                var keyDescriptor = GetEncryptionKey(instance, property);
                 if (keyDescriptor != null && !keyDescriptor.Locked)
                 {
                     var serialized = ProxySerializeFunction(property, obj);
@@ -120,11 +120,12 @@ namespace CryptInject
             return null;
         }
 
-        private KeyDescriptor GetEncryptionKey(PropertyInfo propertyInfo)
+        private KeyDescriptor GetEncryptionKey(EncryptedInstance instance, PropertyInfo propertyInfo)
         {
             var keyAlias = GetEncryptionKeyName(propertyInfo);
-            if (keyAlias != null && EncryptionManager.Keyring.HasKey(keyAlias))
-                return EncryptionManager.Keyring.Keys.FirstOrDefault(k => k.Name == keyAlias);
+            var unifiedKeyring = instance.Reference.Target.GetReadOnlyUnifiedKeyring();
+            if (keyAlias != null && unifiedKeyring.HasKey(keyAlias))
+                return unifiedKeyring.Keys.FirstOrDefault(k => k.Name == keyAlias);
             return null;
         }
 

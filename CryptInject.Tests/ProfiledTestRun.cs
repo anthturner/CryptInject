@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using CryptInject.Keys;
 using CryptInject.Tests.TestObjects;
 using ProtoBuf;
 
@@ -13,26 +14,14 @@ namespace CryptInject.Tests
         private Func<TObject, TSerialized> ProfiledSerializationFunction { get; set; }
         private Func<TSerialized, TObject> ProfiledDeserializationFunction { get; set; }
 
-        public ProfiledTestRun(Func<TObject, TSerialized> profiledSerializationFunction, Func<TSerialized, TObject> profiledDeserializationFunction)
+        private static Keyring GeneratedKeyring { get; set; }
+
+        public ProfiledTestRun(Func<TObject, TSerialized> profiledSerializationFunction, Func<TSerialized, TObject> profiledDeserializationFunction, Keyring keyring)
         {
             ProfiledSerializationFunction = profiledSerializationFunction;
             ProfiledDeserializationFunction = profiledDeserializationFunction;
-        }
 
-        static ProfiledTestRun()
-        {
-            var options = new EncryptionProxyConfiguration((property, serializableObject) =>
-            {
-                var memoryStream = new MemoryStream();
-                Serializer.Serialize(memoryStream, serializableObject);
-                return memoryStream.ToArray();
-            }, (property, data) =>
-            {
-                var genericInvoke = typeof(Serializer).GetMethod("Deserialize", BindingFlags.Static | BindingFlags.Public).MakeGenericMethod(property.PropertyType);
-                return genericInvoke.Invoke(null, new object[] { new MemoryStream(data) });
-            });
-
-            EncryptionManager.PreloadProxyTypes(options);
+            GeneratedKeyring = keyring;
         }
 
         public List<TimeSpan> ProfileSerializationWorkflow(bool useEncryption, int runs = 1)
@@ -40,7 +29,7 @@ namespace CryptInject.Tests
             var times = new List<TimeSpan>();
             var sw = new Stopwatch();
             var testObject = GenerateSampleObject(useEncryption);
-            EncryptionManager.Keyring.Lock();
+            GeneratedKeyring.Lock();
             for (int i = 0; i < runs; i++)
             {
                 sw.Restart();
@@ -48,7 +37,7 @@ namespace CryptInject.Tests
                 sw.Stop();
                 times.Add(sw.Elapsed);
             }
-            EncryptionManager.Keyring.Unlock();
+            GeneratedKeyring.Unlock();
             return times;
         }
 
@@ -57,7 +46,7 @@ namespace CryptInject.Tests
             var times = new List<TimeSpan>();
             var sw = new Stopwatch();
             var testData = GenerateSampleSerializedData(useEncryption);
-            EncryptionManager.Keyring.Lock();
+            GeneratedKeyring.Lock();
             for (int i = 0; i < runs; i++)
             {
                 sw.Restart();
@@ -65,16 +54,16 @@ namespace CryptInject.Tests
                 sw.Stop();
                 times.Add(sw.Elapsed);
             }
-            EncryptionManager.Keyring.Unlock();
+            GeneratedKeyring.Unlock();
             return times;
         }
         
         public TSerialized GenerateSampleSerializedData(bool useEncryption)
         {
             var generatedObject = GenerateSampleObject(useEncryption);
-            EncryptionManager.Keyring.Lock();
+            GeneratedKeyring.Lock();
             var serializedData = ProfiledSerializationFunction.Invoke(generatedObject);
-            EncryptionManager.Keyring.Unlock();
+            GeneratedKeyring.Unlock();
             return serializedData;
         }
 
@@ -90,9 +79,13 @@ namespace CryptInject.Tests
                 var genericInvoke = typeof(Serializer).GetMethod("Deserialize", BindingFlags.Static | BindingFlags.Public).MakeGenericMethod(property.PropertyType);
                 return genericInvoke.Invoke(null, new object[] { new MemoryStream(data) });
             });
-            var testObject = useEncryption ? EncryptionManager.Create<TObject>(options) : Activator.CreateInstance<TObject>();
-            testObject.Populate();
-            return testObject;
+            var instance = Activator.CreateInstance<TObject>();
+            instance.Populate();
+            if (useEncryption)
+            {
+                return instance.AsEncrypted(configuration: options);
+            }
+            return instance;
         }
     }
 }

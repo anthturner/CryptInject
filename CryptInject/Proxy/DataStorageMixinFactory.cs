@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Threading;
 
-namespace CryptInject
+namespace CryptInject.Proxy
 {
     internal static class DataStorageMixinFactory
     {
@@ -19,6 +19,8 @@ namespace CryptInject
         private static readonly AssemblyBuilder AssemblyBuilder;
         private static readonly ModuleBuilder ModuleBuilder;
 
+        internal static Assembly MixinAssembly { get { return AssemblyBuilder; } }
+
         static DataStorageMixinFactory()
         {
             if (AssemblyBuilder == null)
@@ -30,17 +32,17 @@ namespace CryptInject
             }
         }
 
-        internal static object Generate<T>()
+        internal static object Generate(Type type)
         {
-            var existingType = AssemblyBuilder.DefinedTypes.FirstOrDefault(t => t.Name == IMPLEMENTED_TYPE_PREFIX + typeof (T).Name);
+            var existingType = AssemblyBuilder.DefinedTypes.FirstOrDefault(t => t.Name == IMPLEMENTED_TYPE_PREFIX + type.Name);
             if (existingType != null)
             {
                 return Activator.CreateInstance(existingType);
             }
 
-            var properties = GetEncryptionEligibleProperties(typeof(T)).ToArray();
-            var interfaceType = CreateInterfaceType(INTERFACE_TYPE_PREFIX + typeof(T).Name, properties);
-            var implementedType = CreateImplementationType(IMPLEMENTED_TYPE_PREFIX + typeof(T).Name, interfaceType.GetProperties(), typeof(T));
+            var properties = GetEncryptionEligibleProperties(type).ToArray();
+            var interfaceType = CreateInterfaceType(INTERFACE_TYPE_PREFIX + type.Name, properties);
+            var implementedType = CreateImplementationType(IMPLEMENTED_TYPE_PREFIX + type.Name, interfaceType.GetProperties(), type);
             implementedType.AddInterfaceImplementation(interfaceType);
 
             var createdImplementedType = implementedType.CreateType();

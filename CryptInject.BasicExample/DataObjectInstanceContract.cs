@@ -20,12 +20,6 @@ namespace CryptInject.BasicExample
         [SerializerRedirect(typeof(DataMemberAttribute))]
         [Encryptable("Non-Sensitive Information")]
         public virtual string String { get; set; }
-
-        [OnDeserializing]
-        private void Deserializing(StreamingContext context)
-        {
-            EncryptionManager.ForceProxyRebind(this);
-        }
     }
 
     //[DataContract]

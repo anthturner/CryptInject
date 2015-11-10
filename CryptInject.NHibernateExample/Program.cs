@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using CryptInject.Keys;
 using CryptInject.Keys.Builtin;
 using NHibernate;
 using NHibernate.Cfg;
@@ -12,10 +13,9 @@ namespace CryptInject.NHibernateExample
     {
         static void Main(string[] args)
         {
-            EncryptionManager.PreloadProxyTypes();
-            EncryptionManager.Keyring.Add("Sensitive Information", AesEncryptionKey.Create(TripleDesEncryptionKey.Create()));
-            EncryptionManager.Keyring.Add("Semi-Sensitive Information", AesEncryptionKey.Create());
-            EncryptionManager.Keyring.Add("Non-Sensitive Information", TripleDesEncryptionKey.Create());
+            Keyring.GlobalKeyring.Add("Sensitive Information", AesEncryptionKey.Create(TripleDesEncryptionKey.Create()));
+            Keyring.GlobalKeyring.Add("Semi-Sensitive Information", AesEncryptionKey.Create());
+            Keyring.GlobalKeyring.Add("Non-Sensitive Information", TripleDesEncryptionKey.Create());
 
             var examplePatients = GetExamplePatients();
 
@@ -25,7 +25,7 @@ namespace CryptInject.NHibernateExample
 
                 if (patients.Count == 0)
                 {
-                    EncryptionManager.Keyring.Lock();
+                    Keyring.GlobalKeyring.Lock();
 
                     var transaction = session.BeginTransaction();
                     foreach (var patient in examplePatients)
@@ -44,7 +44,7 @@ namespace CryptInject.NHibernateExample
                 }
 
                 Console.WriteLine("WHILE KEYRING IS UNLOCKED:");
-                EncryptionManager.Keyring.Unlock();
+                Keyring.GlobalKeyring.Unlock();
                 foreach (var patient in patients)
                 {
                     Console.WriteLine("{0} {1} - SSN#{2}", patient.FirstName, patient.LastName, patient.SSN);
@@ -61,7 +61,7 @@ namespace CryptInject.NHibernateExample
             {
                 var record = dataRow.Split(',');
 
-                var newPatient = EncryptionManager.Create<Patient>();
+                var newPatient = new Patient().AsEncrypted();
                 newPatient.FirstName = record[0];
                 newPatient.LastName = record[1];
                 newPatient.ALT = double.Parse(record[2]);

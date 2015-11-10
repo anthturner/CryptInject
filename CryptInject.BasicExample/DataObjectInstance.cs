@@ -1,6 +1,5 @@
 ﻿using System;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 
 namespace CryptInject.BasicExample
 {
@@ -21,11 +20,6 @@ namespace CryptInject.BasicExample
         [Encryptable("Non-Sensitive Information")]
         [JsonIgnore]
         public virtual string String { get; set; }
-
-        public DataObjectInstance()
-        {
-            EncryptionManager.ForceProxyRebind(this);
-        }
     }
 
     [Serializable]

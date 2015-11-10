@@ -17,7 +17,7 @@ namespace CryptInject.Tests
             testObj =>
             {
                 var memoryStream = new MemoryStream();
-                var dc = new DataContractSerializer(testObj.GetType(), EncryptionManager.GetKnownTypes(testObj));
+                var dc = new DataContractSerializer(testObj.GetType(), testObj.GetKnownTypes());
                 dc.WriteObject(memoryStream, testObj);
 
                 return memoryStream;
@@ -26,19 +26,20 @@ namespace CryptInject.Tests
             {
                 testStream.Seek(0, SeekOrigin.Begin); // rewind
 
-                var dc = new DataContractSerializer(EncryptionManager.GetProxyType(typeof(TestableDataContract)));
+                var dc = new DataContractSerializer(typeof(TestableDataContract).GetEncryptedType());
                 return (TestableDataContract)dc.ReadObject(testStream);
-            }
+            },
+            GeneratedKeyring
             );
+
+        private static Keyring GeneratedKeyring = new Keyring();
 
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
         {
-            var keyring = new Keyring();
-            keyring.Add("AES", AesEncryptionKey.Create());
-            keyring.Add("DES", TripleDesEncryptionKey.Create());
-            keyring.Add("AES-DES", AesEncryptionKey.Create());
-            EncryptionManager.Keyring = keyring;
+            GeneratedKeyring.Add("AES", AesEncryptionKey.Create());
+            GeneratedKeyring.Add("DES", TripleDesEncryptionKey.Create());
+            GeneratedKeyring.Add("AES-DES", AesEncryptionKey.Create());
         }
 
         [TestMethod]

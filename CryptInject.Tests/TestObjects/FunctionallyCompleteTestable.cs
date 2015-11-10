@@ -16,7 +16,7 @@ namespace CryptInject.Tests.TestObjects
         [SerializerRedirect(typeof(DataContractAttribute))]
         [Encryptable("AES-DES")]
         public virtual int Integer { get; set; }
-        
+
         [Encryptable("AES")]
         public virtual SubObject SubObjectInstance { get; set; }
 

@@ -1,18 +1,20 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using Newtonsoft.Json;
 
 namespace CryptInject.WpfExample
 {
+    [JsonObject]
     [Serializable]
-    [SerializerRedirect(typeof (SerializableAttribute))]
+    [SerializerRedirect(typeof(SerializableAttribute))]
     public class Patient : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
         private DateTime _collected;
 
-        [Encryptable("Semi-Sensitive Information")]
-        public virtual string FirstNameStored { get; set; }
+        public string FirstNameStored { get; set; }
+        [JsonIgnore]
         public string FirstName
         {
             get { return FirstNameStored; }
@@ -23,8 +25,8 @@ namespace CryptInject.WpfExample
             }
         }
 
-        [Encryptable("Semi-Sensitive Information")]
-        public virtual string LastNameStored { get; set; }
+        public string LastNameStored { get; set; }
+        [JsonIgnore]
         public string LastName
         {
             get { return LastNameStored; }
@@ -35,8 +37,11 @@ namespace CryptInject.WpfExample
             }
         }
 
-        [Encryptable("Sensitive Information")]
+        [JsonIgnore]
+        [Encryptable("Office")]
+        [SerializerRedirect(typeof(JsonPropertyAttribute))]
         public virtual string SSNStored { get; set; }
+        [JsonIgnore]
         public string SSN
         {
             get { return SSNStored; }
@@ -47,8 +52,11 @@ namespace CryptInject.WpfExample
             }
         }
 
-        [Encryptable("Sensitive Information")]
+        [JsonIgnore]
+        [Encryptable("Office")]
+        [SerializerRedirect(typeof(JsonPropertyAttribute))]
         public virtual DateTime DOBStored { get; set; }
+        [JsonIgnore]
         public DateTime DOB
         {
             get { return DOBStored; }
@@ -58,35 +66,42 @@ namespace CryptInject.WpfExample
                 OnPropertyChanged();
             }
         }
-
-
-
-        [Encryptable("Non-Sensitive Information")]
-        public virtual double GlucoseStored { get; set; }
-        public double Glucose
+        
+        [JsonIgnore]
+        [Encryptable("Restricted")]
+        [SerializerRedirect(typeof(JsonPropertyAttribute))]
+        public virtual double WeightStored { get; set; }
+        [JsonIgnore]
+        public double Weight
         {
-            get { return GlucoseStored; }
+            get { return WeightStored; }
             set
             {
-                GlucoseStored = value;
+                WeightStored = value;
                 OnPropertyChanged();
             }
         }
 
-        [Encryptable("Non-Sensitive Information")]
-        public virtual double CPeptideStored { get; set; }
-        public double CPeptide
+        [JsonIgnore]
+        [Encryptable("Restricted")]
+        [SerializerRedirect(typeof(JsonPropertyAttribute))]
+        public virtual string LastBloodPressureStored { get; set; }
+        [JsonIgnore]
+        public string LastBloodPressure
         {
-            get { return CPeptideStored; }
+            get { return LastBloodPressureStored; }
             set
             {
-                CPeptideStored = value;
+                LastBloodPressureStored = value;
                 OnPropertyChanged();
             }
         }
 
-        [Encryptable("Non-Sensitive Information")]
+        [JsonIgnore]
+        [Encryptable("Doctor Only")]
+        [SerializerRedirect(typeof(JsonPropertyAttribute))]
         public virtual double ALTStored { get; set; }
+        [JsonIgnore]
         public double ALT
         {
             get { return ALTStored; }
@@ -97,8 +112,11 @@ namespace CryptInject.WpfExample
             }
         }
 
-        [Encryptable("Non-Sensitive Information")]
+        [JsonIgnore]
+        [Encryptable("Doctor Only")]
+        [SerializerRedirect(typeof(JsonPropertyAttribute))]
         public virtual double ASTStored { get; set; }
+        [JsonIgnore]
         public double AST
         {
             get { return ASTStored; }
@@ -109,8 +127,11 @@ namespace CryptInject.WpfExample
             }
         }
 
-        [Encryptable("Non-Sensitive Information")]
+        [JsonIgnore]
+        [Encryptable("Restricted")]
+        [SerializerRedirect(typeof(JsonPropertyAttribute))]
         public virtual double BMIStored { get; set; }
+        [JsonIgnore]
         public double BMI
         {
             get { return BMIStored; }
@@ -121,8 +142,11 @@ namespace CryptInject.WpfExample
             }
         }
 
-        [Encryptable("Non-Sensitive Information")]
+        [JsonIgnore]
+        [Encryptable("Doctor Only")]
+        [SerializerRedirect(typeof(JsonPropertyAttribute))]
         public virtual double HDLStored { get; set; }
+        [JsonIgnore]
         public double HDL
         {
             get { return HDLStored; }
