@@ -14,41 +14,71 @@ namespace CryptInject
         {
             AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
             {
-                if (args.Name.StartsWith("DynamicProxyGenAssembly2") || args.Name.StartsWith(DataStorageMixinFactory.ASSEMBLY_NAME))
+                if (args.Name.StartsWith(DataStorageMixinFactory.ASSEMBLY_NAME))
                 {
                     return DataStorageMixinFactory.MixinAssembly;
+                }
+                else if (args.Name.StartsWith(ModuleScope.DEFAULT_ASSEMBLY_NAME))
+                {
+                    return EncryptedType.Generator.ProxyBuilder.ModuleScope.WeakNamedModule.Assembly;
                 }
                 return null;
             };
         }
 
-        public static void Initialize() { }
+        public static List<Type> GetAllEncryptableTypes()
+        {
+            return AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes().Where(t => t.GetProperties().Any(p => p.GetCustomAttribute<EncryptableAttribute>() != null))).ToList();
+        }
+
+        public static void Relink<T>(this T inputObject, Keyring keyring = null, EncryptionProxyConfiguration configuration = null) where T : class
+        {
+            if (EncryptedType.PendingGenerations.Contains(typeof(T)))
+            {
+                // Ignore any recursive generation from constructors
+                return;
+            }
+
+            if (keyring == null)
+                keyring = new Keyring();
+
+            AttemptRelink(inputObject, keyring, configuration);
+        }
+
+        public static object AsEncrypted(this object inputObject, Keyring keyring = null, EncryptionProxyConfiguration configuration = null)
+        {
+            if (keyring == null)
+                keyring = new Keyring();
+
+            if (!AttemptRelink(inputObject, keyring, configuration))
+            {
+                var trackedInstance = EncryptedInstanceFactory.GenerateTrackedInstance(inputObject.GetType(), configuration);
+                trackedInstance.GetLocalKeyring().Import(keyring);
+                CopyObjectProperties(inputObject, trackedInstance);
+                return trackedInstance;
+            }
+            else
+            {
+                return inputObject;
+            }
+        }
 
         public static T AsEncrypted<T>(this T inputObject, Keyring keyring = null, EncryptionProxyConfiguration configuration = null) where T : class
         {
             if (keyring == null)
                 keyring = new Keyring();
 
-            // Is the object already linked?
-            if (HasValidEncryptionExtensions(inputObject))
+            if (!AttemptRelink(inputObject, keyring, configuration))
             {
-                EncryptedInstanceFactory.AttachInterceptor(inputObject, configuration);
-                inputObject.GetLocalKeyring().Import(keyring);
+                var trackedInstance = EncryptedInstanceFactory.GenerateTrackedInstance(inputObject.GetType(), configuration);
+                trackedInstance.GetLocalKeyring().Import(keyring);
+                CopyObjectProperties(inputObject, trackedInstance);
+                return (T)trackedInstance;
+            }
+            else
+            {
                 return inputObject;
             }
-
-            // Does this object already have the bits we can attach to?
-            if (HasUnlinkedEncryptionExtensions(inputObject))
-            {
-                EncryptedInstanceFactory.AttachToExistingObject(inputObject, configuration);
-                inputObject.GetLocalKeyring().Import(keyring);
-                return inputObject;
-            }
-
-            var trackedInstance = EncryptedInstanceFactory.GenerateTrackedInstance(inputObject, configuration);
-            trackedInstance.GetLocalKeyring().Import(keyring);
-            CopyObjectProperties(inputObject, trackedInstance);
-            return trackedInstance;
         }
 
         public static Type GetEncryptedType(this Type nonEncryptedType)
@@ -116,6 +146,27 @@ namespace CryptInject
             }
 
             return types.Distinct().ToArray();
+        }
+
+        private static bool AttemptRelink(object inputObject, Keyring keyring, EncryptionProxyConfiguration configuration)
+        {
+            // Is the object already linked?
+            if (HasValidEncryptionExtensions(inputObject))
+            {
+                EncryptedInstanceFactory.AttachInterceptor(inputObject, configuration);
+                inputObject.GetLocalKeyring().Import(keyring);
+                return true;
+            }
+
+            // Does this object already have the bits we can attach to?
+            if (HasUnlinkedEncryptionExtensions(inputObject))
+            {
+                EncryptedInstanceFactory.AttachToExistingObject(inputObject, configuration);
+                inputObject.GetLocalKeyring().Import(keyring);
+                return true;
+            }
+
+            return false;
         }
 
         private static void CopyObjectProperties(object inputObject, object proxiedInstance)

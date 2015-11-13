@@ -39,6 +39,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Security" />
+    <Reference Include="System.ServiceModel" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -294,17 +295,14 @@
     <Compile Include="Keys\Builtin\TripleDesEncryptionKey.cs" />
     <Compile Include="Proxy\DataStorageMixinFactory.cs" />
     <Compile Include="SecurityExtensions.cs" />
-    <None Include="__Retiring\EncryptionManager.cs" />
     <Compile Include="Keys\KeyDescriptor.cs" />
     <Compile Include="Keys\Keyring.cs" />
     <Compile Include="Proxy\EncryptedInstance.cs" />
     <Compile Include="Proxy\EncryptedInstanceFactory.cs" />
     <Compile Include="Proxy\EncryptedType.cs" />
     <Compile Include="Proxy\EncryptedProperty.cs" />
-    <None Include="__Retiring\ProxyEncapsulatedType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Attributes\SerializerRedirectAttribute.cs" />
-    <None Include="__Retiring\ProxyInstanceDetail.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

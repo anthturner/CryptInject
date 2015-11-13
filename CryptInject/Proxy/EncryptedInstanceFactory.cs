@@ -18,15 +18,7 @@ namespace CryptInject.Proxy
             Instances = new List<EncryptedInstance>();
             LastPrune = DateTime.Now;
         }
-
-        internal static T GenerateTrackedInstance<T>(T obj, EncryptionProxyConfiguration configuration = null) where T : class
-        {
-            var trackedType = GetTrackedType(typeof (T), configuration);
-            var trackedInstance = new EncryptedInstance(trackedType, trackedType.GenerateInstance<T>());
-            Instances.Add(trackedInstance);
-            return (T)trackedInstance.Reference.Target;
-        }
-
+        
         internal static object GenerateTrackedInstance(Type type, EncryptionProxyConfiguration configuration = null)
         {
             var trackedType = GetTrackedType(type, configuration);
@@ -35,9 +27,9 @@ namespace CryptInject.Proxy
             return trackedInstance.Reference.Target;
         }
 
-        internal static void AttachInterceptor<T>(T obj, EncryptionProxyConfiguration configuration = null) where T : class
+        internal static void AttachInterceptor(object obj, EncryptionProxyConfiguration configuration = null)
         {
-            var trackedType = GetTrackedType(typeof(T));
+            var trackedType = GetTrackedType(obj.GetType());
 
             obj.GetType().GetField("__interceptors", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public).SetValue(obj, new IInterceptor[1] { new EncryptedDataStorageInterceptor() });
             if (GetTrackedInstance(obj) == null)
@@ -46,9 +38,9 @@ namespace CryptInject.Proxy
             }
         }
 
-        internal static void AttachToExistingObject<T>(T obj, EncryptionProxyConfiguration configuration = null) where T : class
+        internal static void AttachToExistingObject(object obj, EncryptionProxyConfiguration configuration = null)
         {
-            var trackedType = GetTrackedType(typeof (T));
+            var trackedType = GetTrackedType(obj.GetType());
             var storageMixin = Activator.CreateInstance(trackedType.MixinType);
             
             obj.GetType().GetField("__interceptors", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public).SetValue(obj, new IInterceptor[1] { new EncryptedDataStorageInterceptor() });
@@ -78,6 +70,10 @@ namespace CryptInject.Proxy
 
         internal static EncryptedType GetTrackedType(Type type, EncryptionProxyConfiguration configuration = null)
         {
+            var encryptedType = GetTrackedTypeByEncrypted(type);
+            if (encryptedType != null)
+                return encryptedType;
+
             var existingType = Types.FirstOrDefault(t => t.OriginalType == type);
             if (existingType == null)
             {

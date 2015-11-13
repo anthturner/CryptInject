@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Castle.DynamicProxy;
 using CryptInject.Keys;
 
@@ -8,7 +10,9 @@ namespace CryptInject.Proxy
 {
     internal class EncryptedType
     {
-        private static ProxyGenerator Generator { get; set; }
+        internal static SynchronizedCollection<Type> PendingGenerations { get; private set; }
+
+        internal static ProxyGenerator Generator { get; set; }
 
         internal Type OriginalType { get; private set; }
         internal Type MixinType { get; private set; }
@@ -17,6 +21,11 @@ namespace CryptInject.Proxy
         internal EncryptionProxyConfiguration Configuration { get; private set; }
 
         internal Dictionary<string, EncryptedProperty> Properties { get; private set; }
+
+        static EncryptedType()
+        {
+            PendingGenerations = new SynchronizedCollection<Type>();
+        }
         
         internal EncryptedType(Type type, EncryptionProxyConfiguration configuration = null)
         {
@@ -27,7 +36,9 @@ namespace CryptInject.Proxy
             MixinType = DataStorageMixinFactory.Generate(OriginalType).GetType();
 
             Properties = new Dictionary<string, EncryptedProperty>();
+            PendingGenerations.Add(type);
             var generatedSample = GenerateInstance(type);
+            PendingGenerations.Remove(type);
             var eligibleProperties = DataStorageMixinFactory.GetEncryptionEligibleProperties(generatedSample.GetType());
             foreach (var eligibleProperty in eligibleProperties)
             {
