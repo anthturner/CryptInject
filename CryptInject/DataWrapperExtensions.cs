@@ -28,7 +28,18 @@ namespace CryptInject
 
         public static List<Type> GetAllEncryptableTypes()
         {
-            return AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes().Where(t => t.GetProperties().Any(p => p.GetCustomAttribute<EncryptableAttribute>() != null))).ToList();
+            var types = new List<Type>();
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                foreach (var type in assembly.GetTypes())
+                {
+                    if (type.GetProperties().Any(p => p.GetCustomAttribute<EncryptableAttribute>() != null))
+                    {
+                        types.Add(type);
+                    }
+                }
+            }
+            return types;
         }
 
         public static void Relink<T>(this T inputObject, Keyring keyring = null, EncryptionProxyConfiguration configuration = null) where T : class
@@ -192,6 +203,7 @@ namespace CryptInject
 
             if (!objectFields.Any(f =>
                 f.Name == "__interceptors" &&
+                f.GetValue(inputObject) != null &&
                 ((IInterceptor[]) f.GetValue(inputObject)).Any(interceptor => interceptor is EncryptedDataStorageInterceptor)))
                 return false;
 
