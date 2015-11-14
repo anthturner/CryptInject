@@ -1,7 +1,4 @@
-﻿using System;
-using System.Runtime.InteropServices;
-using System.Runtime.Serialization;
-using Castle.DynamicProxy;
+﻿using System.Runtime.Serialization;
 
 namespace CryptInject.BasicExample
 {
@@ -20,6 +17,12 @@ namespace CryptInject.BasicExample
         [SerializerRedirect(typeof(DataMemberAttribute))]
         [Encryptable("Non-Sensitive Information")]
         public virtual string String { get; set; }
+
+        [OnDeserializing]
+        void OnDeserializing(StreamingContext c)
+        {
+            this.Relink();
+        }
     }
 
     //[DataContract]

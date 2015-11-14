@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.Serialization;
 using Newtonsoft.Json;
 
 namespace CryptInject.BasicExample
@@ -6,7 +7,7 @@ namespace CryptInject.BasicExample
     [Serializable]
     [JsonObject]
     [SerializerRedirect(typeof(SerializableAttribute))]
-    public class DataObjectInstance
+    public class DataObjectInstance : IDeserializationCallback
     {
         [JsonProperty]
         public InnerObject Member { get; set; }
@@ -20,6 +21,28 @@ namespace CryptInject.BasicExample
         [Encryptable("Non-Sensitive Information")]
         [JsonIgnore]
         public virtual string String { get; set; }
+
+        public DataObjectInstance()
+        {
+            this.Relink();
+        }
+
+        [OnDeserializing]
+        public void OnDeserializing(StreamingContext c)
+        {
+            this.Relink();
+        }
+
+        [OnDeserialized]
+        public void OnDeserialized(StreamingContext c)
+        {
+            this.Relink();
+        }
+
+        public void OnDeserialization(object sender)
+        {
+            this.Relink();
+        }
     }
 
     [Serializable]
@@ -31,5 +54,16 @@ namespace CryptInject.BasicExample
         [Encryptable("Semi-Sensitive Information")]
         [JsonIgnore]
         public virtual string HelloStr { get; set; }
+
+        public InnerObject()
+        {
+            this.Relink();
+        }
+
+        [OnDeserializing]
+        public void OnDeserializing(StreamingContext c)
+        {
+            this.Relink();
+        }
     }
 }

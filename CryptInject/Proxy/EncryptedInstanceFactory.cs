@@ -65,7 +65,7 @@ namespace CryptInject.Proxy
 
         internal static EncryptedType GetTrackedTypeByEncrypted(Type type)
         {
-            return Types.FirstOrDefault(t => t.ProxyType == type);
+            return Types.FirstOrDefault(t => t.ProxyType.FullName == type.FullName);
         }
 
         internal static EncryptedType GetTrackedType(Type type, EncryptionProxyConfiguration configuration = null)
