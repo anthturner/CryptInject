@@ -26,6 +26,10 @@ namespace CryptInject
             };
         }
 
+        /// <summary>
+        /// Returns a list of all types in all loaded assemblies that contain properties marked with the [Encryptable] attribute
+        /// </summary>
+        /// <returns>List of all types in all loaded assemblies that contain properties marked with the [Encryptable] attribute</returns>
         public static List<Type> GetAllEncryptableTypes()
         {
             var types = new List<Type>();
@@ -42,6 +46,13 @@ namespace CryptInject
             return types;
         }
 
+        /// <summary>
+        /// Re-link proxy bindings to the given object
+        /// </summary>
+        /// <typeparam name="T">Type of object being linked</typeparam>
+        /// <param name="inputObject">Object to link proxies into</param>
+        /// <param name="keyring">Local keyring to use in resulting linked object</param>
+        /// <param name="configuration">Local configuration to use in resulting linked object</param>
         public static void Relink<T>(this T inputObject, Keyring keyring = null, EncryptionProxyConfiguration configuration = null) where T : class
         {
             if (EncryptedType.PendingGenerations.Contains(typeof(T)))
@@ -56,6 +67,13 @@ namespace CryptInject
             AttemptRelink(inputObject, keyring, configuration);
         }
 
+        /// <summary>
+        /// Return a copy of the given object with proxy bindings (this could either be a relink or a creation operation)
+        /// </summary>
+        /// <param name="inputObject">Object being linked or wrapped in an encryption proxy</param>
+        /// <param name="keyring">Local keyring to use in resulting linked object</param>
+        /// <param name="configuration">Local configuration to use in resulting linked object</param>
+        /// <returns>Object of same type as input, with proxy bindings</returns>
         public static object AsEncrypted(this object inputObject, Keyring keyring = null, EncryptionProxyConfiguration configuration = null)
         {
             if (keyring == null)
@@ -74,6 +92,14 @@ namespace CryptInject
             }
         }
 
+        /// <summary>
+        /// Return a copy of the given object with proxy bindings (this could either be a relink or a creation operation)
+        /// </summary>
+        /// <typeparam name="T">Type of object being linked</typeparam>
+        /// <param name="inputObject">Object being linked or wrapped in an encryption proxy</param>
+        /// <param name="keyring">Local keyring to use in resulting linked object</param>
+        /// <param name="configuration">Local configuration to use in resulting linked object</param>
+        /// <returns>Object of same type as input, with proxy bindings</returns>
         public static T AsEncrypted<T>(this T inputObject, Keyring keyring = null, EncryptionProxyConfiguration configuration = null) where T : class
         {
             if (keyring == null)
@@ -92,12 +118,22 @@ namespace CryptInject
             }
         }
 
+        /// <summary>
+        /// Get the proxy (encrypted) type for the given regular type
+        /// </summary>
+        /// <param name="nonEncryptedType">"Regular" object type ("Patient")</param>
+        /// <returns>Encrypted object type ("PatientProxy")</returns>
         public static Type GetEncryptedType(this Type nonEncryptedType)
         {
             var trackedType = EncryptedInstanceFactory.GetTrackedTypeOrNull(nonEncryptedType);
             return trackedType == null ? null : trackedType.ProxyType;
         }
 
+        /// <summary>
+        /// Get the regular (non-encrypted) type for the given encrypted type
+        /// </summary>
+        /// <param name="encryptedType">Encrypted object type ("PatientProxy")</param>
+        /// <returns>Regular object type ("Patient")</returns>
         public static Type GetNonEncryptedType(this Type encryptedType)
         {
             var trackedType = EncryptedInstanceFactory.GetTrackedTypeByEncrypted(encryptedType);
@@ -105,6 +141,12 @@ namespace CryptInject
         }
 
         #region Keyring Management
+        /// <summary>
+        /// Retrieve an effective keyring for a given object in read-only mode; this returns a combination of the global, type, and instance keyrings.
+        /// </summary>
+        /// <typeparam name="T">Type of encrypted object</typeparam>
+        /// <param name="objectInstance">Instance of an encrypted object</param>
+        /// <returns>Effective keyring</returns>
         public static Keyring GetReadOnlyUnifiedKeyring<T>(this T objectInstance) where T : class
         {
             var keyring = new Keyring();
@@ -115,17 +157,35 @@ namespace CryptInject
             return keyring;
         }
 
+        /// <summary>
+        /// Retrieve the global keyring (alias for Keyring.GlobalKeyring)
+        /// </summary>
+        /// <typeparam name="T">Type of encrypted object</typeparam>
+        /// <param name="objectInstance">Instance of an encrypted object</param>
+        /// <returns>Global keyring</returns>
         public static Keyring GetGlobalKeyring<T>(this T objectInstance) where T : class
         {
             return Keyring.GlobalKeyring;
         }
 
+        /// <summary>
+        /// Retrieve the keyring for an object's Type
+        /// </summary>
+        /// <typeparam name="T">Type of encrypted object</typeparam>
+        /// <param name="objectInstance">Instance of an encrypted object</param>
+        /// <returns>Type keyring</returns>
         public static Keyring GetTypeKeyring<T>(this T objectInstance) where T : class
         {
             var trackedType = EncryptedInstanceFactory.GetTrackedType(typeof (T));
             return trackedType.Keyring;
         }
 
+        /// <summary>
+        /// Retrieve the keyring for an instance of an object
+        /// </summary>
+        /// <typeparam name="T">Type of encrypted object</typeparam>
+        /// <param name="objectInstance">Instance of an encrypted object</param>
+        /// <returns>Local (instance) keyring</returns>
         public static Keyring GetLocalKeyring<T>(this T objectInstance) where T : class
         {
             var trackedInstance = EncryptedInstanceFactory.GetTrackedInstance(objectInstance);
