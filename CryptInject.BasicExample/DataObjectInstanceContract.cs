@@ -3,13 +3,9 @@
 namespace CryptInject.BasicExample
 {
     [DataContract]
-    //[KnownType(typeof(InnerObjectContract))]
     [SerializerRedirect(typeof(DataContractAttribute))]
     public class DataObjectInstanceContract
     {
-        //[DataMember]
-        //public InnerObjectContract Member { get; set; }
-
         [SerializerRedirect(typeof(DataMemberAttribute))]
         [Encryptable("Sensitive Information")]
         public virtual int Integer { get; set; }
@@ -24,13 +20,4 @@ namespace CryptInject.BasicExample
             this.Relink();
         }
     }
-
-    //[DataContract]
-    //[SerializerRedirect(typeof(DataContractAttribute))]
-    //public class InnerObjectContract
-    //{
-    //    [SerializerRedirect(typeof(DataMemberAttribute))]
-    //    [Encryptable("Semi-Sensitive Information")]
-    //    public virtual string HelloStr { get; set; }
-    //}
 }
