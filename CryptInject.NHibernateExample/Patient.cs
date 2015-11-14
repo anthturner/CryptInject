@@ -37,5 +37,10 @@ namespace CryptInject.NHibernateExample
         public virtual double HDL { get; set; }
 
         public virtual DateTime Collected { get; set; }
+
+        public Patient()
+        {
+            this.Relink();
+        }
     }
 }

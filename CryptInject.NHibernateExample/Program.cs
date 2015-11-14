@@ -6,6 +6,7 @@ using CryptInject.Keys.Builtin;
 using NHibernate;
 using NHibernate.Cfg;
 using NHibernate.Linq;
+using NHibernate.Tool.hbm2ddl;
 
 namespace CryptInject.NHibernateExample
 {
@@ -21,7 +22,8 @@ namespace CryptInject.NHibernateExample
 
             using (var session = GetSession())
             {
-                List<Patient> patients = session.Query<Patient>().ToList();
+                List<Patient> patients = new List<Patient>();
+                patients.AddRange(session.Query<Patient>().ToList());
 
                 if (patients.Count == 0)
                 {
