@@ -28,11 +28,11 @@ namespace CryptInject
 
             if (property.PropertyType == typeof (string))
             {
-                if (index > -1)
-                {
-                    var str = property.GetValue(obj, new object[] {index}) as string;
-                    str.DestroyString();
-                }
+                //if (index > -1)
+                //{
+                //    var str = property.GetValue(obj, new object[] {index}) as string;
+                //    str.DestroyString();
+                //}
             }
             else
             {
@@ -65,6 +65,7 @@ namespace CryptInject
 
         internal static void DestroyString(this string str)
         {
+            return; // stub out
             unsafe
             {
                 fixed (char* ptr = str)

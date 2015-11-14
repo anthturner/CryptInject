@@ -25,15 +25,7 @@ namespace CryptInject.Proxy
                         proxiedType.SetValue(propertyName, invocation.Arguments[0]);
                         if (invocation.Arguments[0] is string)
                         {
-                            // todo: look in config to be able to turn on/off immutable string security workaround
-                            unsafe
-                            {
-                                fixed (char* chars = ((string)invocation.Arguments[0]))
-                                {
-                                    for (int i = 0; i < ((string) invocation.Arguments[0]).Length; i++)
-                                        chars[i] = 'x';
-                                }
-                            }
+                            ((string)invocation.Arguments[0]).DestroyString();
                         }
                         invocation.Arguments[0] = null;
 
