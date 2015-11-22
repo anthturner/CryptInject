@@ -3,13 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using Castle.Core.Internal;
 
 namespace CryptInject.Keys
 {
     public sealed class Keyring : IEnumerable<KeyDescriptor>
     {
+        internal HashSet<string> KeyNames { get; private set; }
         internal List<KeyDescriptor> Keys { get; private set; }
 
         public delegate void KeyringChangedDelegate();
@@ -27,6 +27,7 @@ namespace CryptInject.Keys
         public Keyring()
         {
             Keys = new List<KeyDescriptor>();
+            KeyNames = new HashSet<string>();
         }
 
         /// <summary>
@@ -39,13 +40,14 @@ namespace CryptInject.Keys
         {
             if (ReadOnly)
                 throw new Exception("Keyring is read-only.");
-            if (Keys.Any(k => k.Name == name))
+            if (KeyNames.Contains(name))
                 throw new Exception("Key already exists. If replacing, use Remove() first.");
             var newKey = new KeyDescriptor(name, key, preLocked);
-            newKey.KeyLockChanged += locked => { if (KeyringChanged != null) KeyringChanged(); };
+            newKey.KeyLockChanged += locked => { KeyringChanged?.Invoke(); };
             Keys.Add(newKey);
+            KeyNames.Add(newKey.Name);
 
-            if (KeyringChanged != null) KeyringChanged();
+            KeyringChanged?.Invoke();
         }
 
         /// <summary>
@@ -56,11 +58,12 @@ namespace CryptInject.Keys
         {
             if (ReadOnly)
                 throw new Exception("Keyring is read-only.");
-            if (!Keys.Any(k => k.Name == name))
+            if (KeyNames.Contains(name))
                 throw new Exception("Key not found.");
             Keys.RemoveAll(k => k.Name == name);
+            KeyNames.Remove(name);
 
-            if (KeyringChanged != null) KeyringChanged();
+            KeyringChanged?.Invoke();
         }
 
         /// <summary>
@@ -70,7 +73,7 @@ namespace CryptInject.Keys
         /// <returns></returns>
         public bool HasKey(string name)
         {
-            return Keys.Any(k => k.Name == name);
+            return KeyNames.Contains(name);
         }
 
         /// <summary>
@@ -78,7 +81,7 @@ namespace CryptInject.Keys
         /// </summary>
         public IEnumerable<string> KeysProvided
         {
-            get { return Keys.Select(k => k.Name); }
+            get { return KeyNames; }
         }
 
         /// <summary>
@@ -112,7 +115,7 @@ namespace CryptInject.Keys
                 Add(key.Name, key.KeyData, key.Locked);
             }
 
-            if (KeyringChanged != null) KeyringChanged();
+            KeyringChanged?.Invoke();
         }
 
         /// <summary>
