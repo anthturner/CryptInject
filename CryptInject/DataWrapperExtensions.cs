@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Castle.DynamicProxy;
 using CryptInject.Keys;
 using CryptInject.Proxy;
@@ -10,6 +11,8 @@ namespace CryptInject
 {
     public static class DataWrapperExtensions
     {
+        private static List<Type> _encryptableTypes = null;
+
         static DataWrapperExtensions()
         {
             AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
@@ -30,20 +33,23 @@ namespace CryptInject
         /// Returns a list of all types in all loaded assemblies that contain properties marked with the [Encryptable] attribute
         /// </summary>
         /// <returns>List of all types in all loaded assemblies that contain properties marked with the [Encryptable] attribute</returns>
-        public static List<Type> GetAllEncryptableTypes()
+        public static List<Type> GetAllEncryptableTypes(bool forceRefresh = false)
         {
-            var types = new List<Type>();
-            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            if (forceRefresh || _encryptableTypes == null)
             {
-                foreach (var type in assembly.GetTypes())
+                _encryptableTypes = new List<Type>();
+                foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
                 {
-                    if (type.GetProperties().Any(p => p.GetCustomAttribute<EncryptableAttribute>() != null))
+                    foreach (var type in assembly.GetTypes())
                     {
-                        types.Add(type);
+                        if (type.GetProperties().Any(p => p.GetCustomAttribute<EncryptableAttribute>() != null))
+                        {
+                            _encryptableTypes.Add(type);
+                        }
                     }
                 }
             }
-            return types;
+            return _encryptableTypes;
         }
 
         /// <summary>
@@ -206,16 +212,13 @@ namespace CryptInject
             if (obj == null)
                 return new Type[0];
 
-            foreach (var prop in obj.GetType().GetProperties())
+            var encTypes = GetAllEncryptableTypes();
+
+            foreach (var type in encTypes)
             {
-                var val = prop.GetValue(obj, null);
-                if (val != null)
-                    types.Add(val.GetType());
-
-                if (prop.PropertyType.GetProperties().Any() && prop.PropertyType != typeof(string))
-                    types.AddRange(GetKnownTypes(val));
+                types.Add(type);
+                types.Add(type.GetEncryptedType());
             }
-
             return types.Distinct().ToArray();
         }
 
