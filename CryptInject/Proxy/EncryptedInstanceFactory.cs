@@ -10,12 +10,16 @@ namespace CryptInject.Proxy
     {
         private static List<EncryptedType> Types { get; set; }
         private static List<EncryptedInstance> Instances { get; set; }
+        private static Dictionary<Type, EncryptedType> TypesByProxy { get; set; }
+        private static Dictionary<Type, EncryptedType> TypesByOriginal { get; set; }
         private static DateTime LastPrune { get; set; }
 
         static EncryptedInstanceFactory()
         {
             Types = new List<EncryptedType>();
             Instances = new List<EncryptedInstance>();
+            TypesByProxy = new Dictionary<Type, EncryptedType>();
+            TypesByOriginal = new Dictionary<Type, EncryptedType>();
             LastPrune = DateTime.Now;
         }
         
@@ -54,18 +58,23 @@ namespace CryptInject.Proxy
 
         internal static EncryptedInstance GetTrackedInstance(object obj)
         {
-            PruneGCedInstanceReferences();
+            if (Instances.Count % 3 == 0)
+                PruneGCedInstanceReferences();
             return Instances.FirstOrDefault(i => i.References(obj));
         }
 
         internal static EncryptedType GetTrackedTypeOrNull(Type type)
         {
-            return Types.FirstOrDefault(t => t.OriginalType == type);
+            EncryptedType returnVal;
+            TypesByOriginal.TryGetValue(type, out returnVal);
+            return returnVal;
         }
 
         internal static EncryptedType GetTrackedTypeByEncrypted(Type type)
         {
-            return Types.FirstOrDefault(t => t.ProxyType.FullName == type.FullName);
+            EncryptedType returnVal;
+            TypesByProxy.TryGetValue(type, out returnVal);
+            return returnVal;
         }
 
         internal static EncryptedType GetTrackedType(Type type, EncryptionProxyConfiguration configuration = null)
@@ -74,13 +83,15 @@ namespace CryptInject.Proxy
             if (encryptedType != null)
                 return encryptedType;
 
-            var existingType = Types.FirstOrDefault(t => t.OriginalType == type);
+            var existingType = GetTrackedTypeOrNull(type);
             if (existingType == null)
             {
                 if (configuration == null)
                     configuration = new EncryptionProxyConfiguration();
                 existingType = new EncryptedType(type, configuration);
                 Types.Add(existingType);
+                TypesByProxy.Add(existingType.ProxyType, existingType);
+                TypesByOriginal.Add(type, existingType);
             }
             return existingType;
         }
