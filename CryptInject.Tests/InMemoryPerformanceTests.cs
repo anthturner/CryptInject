@@ -18,19 +18,15 @@ namespace CryptInject.Tests
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
         {
-            GeneratedKeyring = new Keyring();
-            GeneratedKeyring.Add("AES", AesEncryptionKey.Create());
-            GeneratedKeyring.Add("DES", TripleDesEncryptionKey.Create());
-            GeneratedKeyring.Add("AES-DES", AesEncryptionKey.Create(TripleDesEncryptionKey.Create()));
+            Keyring.GlobalKeyring.Add("AES", AesEncryptionKey.Create());
+            Keyring.GlobalKeyring.Add("DES", TripleDesEncryptionKey.Create());
+            Keyring.GlobalKeyring.Add("AES-DES", AesEncryptionKey.Create(TripleDesEncryptionKey.Create()));
 
             BaseTestObject = new TestableDataContract();
             BaseTestObject.Populate();
 
-            GeneratedTestObject = new TestableDataContract();
+            GeneratedTestObject = new TestableDataContract().AsEncrypted();
             GeneratedTestObject.Populate();
-            GeneratedTestObject.AsEncrypted();
-
-            GeneratedKeyring.Unlock();
         }
 
         [TestMethod]

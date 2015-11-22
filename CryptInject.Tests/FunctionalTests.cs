@@ -11,26 +11,21 @@ namespace CryptInject.Tests
     [TestClass]
     public class FunctionalTests
     {
-        private Keyring GeneratedKeyring { get; set; }
-
         [TestInitialize]
         public void Initialize()
         {
-            GeneratedKeyring = new Keyring();
-            GeneratedKeyring.Add("AES-DES", AesEncryptionKey.Create(TripleDesEncryptionKey.Create()));
-            GeneratedKeyring.Add("DES", TripleDesEncryptionKey.Create());
-            GeneratedKeyring.Add("AES", AesEncryptionKey.Create());
+            Keyring.GlobalKeyring.Add("AES-DES", AesEncryptionKey.Create(TripleDesEncryptionKey.Create()));
+            Keyring.GlobalKeyring.Add("DES", TripleDesEncryptionKey.Create());
+            Keyring.GlobalKeyring.Add("AES", AesEncryptionKey.Create());
         }
 
         [TestMethod]
         public void Functional_RunsFullyCompleteObject()
         {
-            var functionallyCompleteObject = new FunctionallyCompleteTestable();
-            functionallyCompleteObject.Populate();
+            var encryptedObj = new FunctionallyCompleteTestable().AsEncrypted();
+            encryptedObj.Populate();
 
-            var encryptedObj = functionallyCompleteObject.AsEncrypted(GeneratedKeyring);
-            
-            GeneratedKeyring.Lock();
+            Keyring.GlobalKeyring.Lock();
 
             Assert.AreEqual(encryptedObj.String, default(string));
             Assert.AreEqual(encryptedObj.Integer, default(int));
@@ -44,9 +39,10 @@ namespace CryptInject.Tests
             bf.Serialize(ms, encryptedObj);
             ms.Seek(0, SeekOrigin.Begin);
 
-            GeneratedKeyring.Unlock();
-
+            Keyring.GlobalKeyring.Unlock();
+            
             var replaced = (FunctionallyCompleteTestable) bf.Deserialize(ms);
+            replaced.Relink();
 
             var baseObject = new FunctionallyCompleteTestable();
             baseObject.Populate();
