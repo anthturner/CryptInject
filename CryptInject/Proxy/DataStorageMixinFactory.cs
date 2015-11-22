@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace CryptInject.Proxy
@@ -83,8 +84,12 @@ namespace CryptInject.Proxy
             {
                 string piName = pi.Name;
                 Type propertyType = pi.PropertyType;
-                
-                FieldBuilder field = typeBuilder.DefineField("_" + piName, propertyType, FieldAttributes.Private);
+
+                FieldBuilder field;
+                if (piName.StartsWith(CACHE_PROPERTY_PREFIX))
+                    field = typeBuilder.DefineField("_" + piName, propertyType, new Type[] { typeof(IsVolatile) }, Type.EmptyTypes, FieldAttributes.Private);
+                else
+                    field = typeBuilder.DefineField("_" + piName, propertyType, FieldAttributes.Private);
 
                 MethodInfo getMethod = pi.GetGetMethod();
                 if (getMethod != null)
