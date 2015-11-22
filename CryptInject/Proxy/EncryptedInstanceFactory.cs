@@ -10,16 +10,16 @@ namespace CryptInject.Proxy
     {
         private static List<EncryptedType> Types { get; set; }
         private static List<EncryptedInstance> Instances { get; set; }
-        private static Dictionary<Type, EncryptedType> TypesByProxy { get; set; }
-        private static Dictionary<Type, EncryptedType> TypesByOriginal { get; set; }
+        private static Dictionary<string, EncryptedType> TypesByProxy { get; set; }
+        private static Dictionary<string, EncryptedType> TypesByOriginal { get; set; }
         private static DateTime LastPrune { get; set; }
 
         static EncryptedInstanceFactory()
         {
             Types = new List<EncryptedType>();
             Instances = new List<EncryptedInstance>();
-            TypesByProxy = new Dictionary<Type, EncryptedType>();
-            TypesByOriginal = new Dictionary<Type, EncryptedType>();
+            TypesByProxy = new Dictionary<string, EncryptedType>();
+            TypesByOriginal = new Dictionary<string, EncryptedType>();
             LastPrune = DateTime.Now;
         }
         
@@ -66,14 +66,14 @@ namespace CryptInject.Proxy
         internal static EncryptedType GetTrackedTypeOrNull(Type type)
         {
             EncryptedType returnVal;
-            TypesByOriginal.TryGetValue(type, out returnVal);
+            TypesByOriginal.TryGetValue(type.FullName, out returnVal);
             return returnVal;
         }
 
         internal static EncryptedType GetTrackedTypeByEncrypted(Type type)
         {
             EncryptedType returnVal;
-            TypesByProxy.TryGetValue(type, out returnVal);
+            TypesByProxy.TryGetValue(type.FullName, out returnVal);
             return returnVal;
         }
 
@@ -90,8 +90,8 @@ namespace CryptInject.Proxy
                     configuration = new EncryptionProxyConfiguration();
                 existingType = new EncryptedType(type, configuration);
                 Types.Add(existingType);
-                TypesByProxy.Add(existingType.ProxyType, existingType);
-                TypesByOriginal.Add(type, existingType);
+                TypesByProxy.Add(existingType.ProxyType.FullName, existingType);
+                TypesByOriginal.Add(type.FullName, existingType);
             }
             return existingType;
         }
