@@ -42,6 +42,9 @@ namespace CryptInject.Tests
             GeneratedKeyring.Add("AES", AesEncryptionKey.Create());
             GeneratedKeyring.Add("DES", TripleDesEncryptionKey.Create());
             GeneratedKeyring.Add("AES-DES", AesEncryptionKey.Create());
+
+            // Warmup
+            var types = DataWrapperExtensions.GetAllEncryptableTypes(true);
         }
 
         [TestMethod]
