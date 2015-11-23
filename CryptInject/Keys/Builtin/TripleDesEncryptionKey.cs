@@ -85,5 +85,10 @@ namespace CryptInject.Keys.Builtin
                 TripleDes.Mode = (CipherMode) value[0];
             }
         }
+
+        protected override bool IsPeriodicallyAccessibleKey()
+        {
+            return false;
+        }
     }
 }

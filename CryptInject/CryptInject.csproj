@@ -37,6 +37,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Management" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Security" />
     <Reference Include="System.ServiceModel" />
@@ -285,6 +286,8 @@
     <Compile Include="Castle\DynamicProxy\Tokens\TypeUtilMethods.cs" />
     <Compile Include="DataWrapperExtensions.cs" />
     <Compile Include="Attributes\EncryptableAttribute.cs" />
+    <Compile Include="Keys\Programmatic\TimeWindowKey.cs" />
+    <Compile Include="Keys\Programmatic\VirtualMachineProhibitedKey.cs" />
     <Compile Include="Proxy\CryptInjectHook.cs" />
     <Compile Include="Proxy\EncryptedDataStorageInterceptor.cs" />
     <Compile Include="EncryptionProxyConfiguration.cs" />

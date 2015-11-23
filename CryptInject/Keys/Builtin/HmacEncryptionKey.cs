@@ -57,6 +57,10 @@ namespace CryptInject.Keys.Builtin
         }
 
         protected override byte[] ExportData { get { return new byte[] { (byte)Cipher }; } set { Cipher = (HmacCipher)value[0]; } }
+        protected override bool IsPeriodicallyAccessibleKey()
+        {
+            return false;
+        }
 
         private HMAC GetAlgorithm()
         {

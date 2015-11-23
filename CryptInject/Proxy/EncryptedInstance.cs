@@ -28,6 +28,7 @@ namespace CryptInject.Proxy
         
         internal object GetValue(string propertyName)
         {
+            // todo: boxing -- needs to be fixed for performance reasons
             var property = EncryptedType.Properties[propertyName];
 
             var encryptedValue = property.GetBackingValue(Reference.Target);
@@ -38,22 +39,28 @@ namespace CryptInject.Proxy
             if (property.HasCache)
             {
                 cacheValue = property.GetCacheValue(Reference.Target);
-                if (cacheValue == null)
+                
+                if (cacheValue == property.Original.GetNullValue())
                 {
                     cacheValue = EncryptedType.Configuration.AccessValue(this, property.Original, encryptedValue);
                     property.SetCacheValue(Reference.Target, cacheValue);
-
                 }
-                else if (!cacheValue.Equals(property.Original.GetNullValue()))
-                    // todo: this is always false, we need to do better or reads on non-primitives will be slow
+                else if (!property.Original.PropertyType.IsValueType && property.Original.PropertyType != typeof(string)) // reference type
                 {
-                    var encryptedCachedObject = EncryptedType.Configuration.MutateValue(this, property.Original,
-                        cacheValue);
+                    // update backing value just in case the referenced object's contents changed
+                    // todo: make this into a tunable option for cacheback frequency
+                    var encryptedCachedObject = EncryptedType.Configuration.MutateValue(this, property.Original, cacheValue);
                     property.SetBackingValue(Reference.Target, encryptedCachedObject);
+                }
+
+                if (EncryptedType.Configuration.IsPeriodicallyAccessibleKey(this, property.Original))
+                {
+                    cacheValue = EncryptedType.Configuration.AccessValue(this, property.Original, encryptedValue);
                 }
             }
             else
             {
+                // this will never be hit under current config (everything has cache)
                 cacheValue = EncryptedType.Configuration.AccessValue(this, property.Original, encryptedValue).CastToProperty(property.Original);
                 property.Instantiated.Add(new WeakReference(cacheValue));
             }

@@ -86,9 +86,9 @@ namespace CryptInject.Proxy
                 Type propertyType = pi.PropertyType;
 
                 FieldBuilder field;
-                if (piName.StartsWith(CACHE_PROPERTY_PREFIX))
-                    field = typeBuilder.DefineField("_" + piName, propertyType, new Type[] { typeof(IsVolatile) }, Type.EmptyTypes, FieldAttributes.Private);
-                else
+                //if (piName.StartsWith(CACHE_PROPERTY_PREFIX))
+                //    field = typeBuilder.DefineField("_" + piName, propertyType, new Type[] { typeof(IsVolatile) }, Type.EmptyTypes, FieldAttributes.Private);
+                //else
                     field = typeBuilder.DefineField("_" + piName, propertyType, FieldAttributes.Private);
 
                 MethodInfo getMethod = pi.GetGetMethod();
@@ -158,22 +158,22 @@ namespace CryptInject.Proxy
                 newProperty.SetSetMethod(newPropertySet);
 
 
-                if (!property.PropertyType.IsValueType && property.PropertyType != typeof(string))
-                {
+                //if (!property.PropertyType.IsValueType && property.PropertyType != typeof(string))
+                //{
                     var cacheProperty = typeBuilder.DefineProperty(CACHE_PROPERTY_PREFIX + property.Name,
-                        PropertyAttributes.None, typeof (object), null);
+                        PropertyAttributes.None, property.PropertyType, null);
                     var newCachePropertyGet = typeBuilder.DefineMethod("get_" + cacheProperty.Name,
                         MethodAttributes.Abstract | MethodAttributes.Virtual | MethodAttributes.Public |
-                        MethodAttributes.SpecialName, typeof (object), Type.EmptyTypes);
+                        MethodAttributes.SpecialName, property.PropertyType, Type.EmptyTypes);
                     var newCachePropertySet = typeBuilder.DefineMethod("set_" + cacheProperty.Name,
                         MethodAttributes.Abstract | MethodAttributes.Virtual | MethodAttributes.Public |
-                        MethodAttributes.SpecialName, null, new Type[] {typeof (object)});
+                        MethodAttributes.SpecialName, null, new Type[] { property.PropertyType });
 
                     if (copyPropertyAttributes)
                         CopyProperties(property, cacheProperty);
                     cacheProperty.SetGetMethod(newCachePropertyGet);
                     cacheProperty.SetSetMethod(newCachePropertySet);
-                }
+                //}
             }
 
             typeBuilder.CreateType();

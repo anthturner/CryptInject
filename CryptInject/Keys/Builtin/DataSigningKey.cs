@@ -61,5 +61,10 @@ namespace CryptInject.Keys.Builtin
             get { return SigningCertificate.Export(X509ContentType.SerializedCert); }
             set { SigningCertificate = new X509Certificate2(value); }
         }
+
+        protected override bool IsPeriodicallyAccessibleKey()
+        {
+            return false;
+        }
     }
 }

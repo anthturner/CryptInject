@@ -9,6 +9,14 @@ namespace CryptInject.Keys
 {
     public abstract class EncryptionKey
     {
+        [Flags]
+        public enum KeyAppliesTo : byte
+        {
+            Encryption = 0,
+            Decryption = 1,
+            Both = Encryption | Decryption
+        }
+
         private bool Disposed { get; set; }
         private byte[] Key { get; set; }
         private int Pad { get; set; }
@@ -24,6 +32,7 @@ namespace CryptInject.Keys
         protected abstract byte[] Encrypt(PropertyInfo property, byte[] key, byte[] bytes);
         protected abstract byte[] Decrypt(PropertyInfo property, byte[] key, byte[] bytes);
         protected abstract byte[] ExportData { get; set; }
+        protected abstract bool IsPeriodicallyAccessibleKey();
 
         internal byte[] Encrypt(PropertyInfo property, byte[] bytes)
         {
@@ -44,6 +53,13 @@ namespace CryptInject.Keys
 
             Zero(unlockedKey);
             return result;
+        }
+
+        internal bool IsPeriodicallyAccessibleKey(PropertyInfo property)
+        {
+            if (ChainedInnerKey != null)
+                return ChainedInnerKey.IsPeriodicallyAccessibleKey(property);
+            return IsPeriodicallyAccessibleKey();
         }
 
         /// <summary>

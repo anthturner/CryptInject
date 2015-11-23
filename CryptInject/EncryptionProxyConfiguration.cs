@@ -120,6 +120,16 @@ namespace CryptInject
             return null;
         }
 
+        internal bool IsPeriodicallyAccessibleKey(EncryptedInstance instance, PropertyInfo property)
+        {
+            var keyDescriptor = GetEncryptionKey(instance, property);
+            if (keyDescriptor == null)
+            {
+                throw new UnauthorizedAccessException("Key '" + GetEncryptionKeyName(property) + "' not loaded");
+            }
+            return keyDescriptor.KeyData.IsPeriodicallyAccessibleKey(property);
+        }
+
         private KeyDescriptor GetEncryptionKey(EncryptedInstance instance, PropertyInfo propertyInfo)
         {
             var keyAlias = GetEncryptionKeyName(propertyInfo);

@@ -62,6 +62,10 @@ namespace CryptInject.Keys.Builtin
         }
 
         protected override byte[] ExportData { get {return new byte[0];} set {} }
+        protected override bool IsPeriodicallyAccessibleKey()
+        {
+            return false;
+        }
 
         private byte[] Transform(byte[] buffer, ICryptoTransform transform)
         {
