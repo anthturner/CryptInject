@@ -1,7 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.ServiceModel;
 using System.ServiceModel.Description;
+using System.Threading;
+using System.Threading.Tasks;
 using CryptInject.Keys;
 using CryptInject.Keys.Builtin;
 
@@ -13,10 +18,18 @@ namespace CryptInject.WcfExample
 
         static void Main(string[] args)
         {
-            Keyring.GlobalKeyring.Add("Sensitive Information", AesEncryptionKey.Create(TripleDesEncryptionKey.Create()));
-            Keyring.GlobalKeyring.Add("Semi-Sensitive Information", AesEncryptionKey.Create());
-            Keyring.GlobalKeyring.Add("Non-Sensitive Information", TripleDesEncryptionKey.Create());
+            if (args != null && args.Length > 0 && args[0] == "--service")
+                RunService();
+            else
+            {
+                Process.Start("CryptInject.WcfExample.exe", "--service");
+                Task.Delay(1000).Wait(1000);
+                RunClient();
+            }
+        }
 
+        private static void RunService()
+        {
             // Start Service
             var svcHost = new ServiceHost(typeof(Service), new Uri(Url));
             svcHost.Description.Behaviors.Remove(typeof(ServiceDebugBehavior));
@@ -25,11 +38,21 @@ namespace CryptInject.WcfExample
             svcHost.AddServiceEndpoint(typeof(IService), httpb, Url);
             svcHost.Open();
 
+            Console.WriteLine("Press [ENTER] to quit server.");
+            Console.ReadLine();
+        }
+
+        private static void RunClient()
+        {
+            Keyring.GlobalKeyring.Add("Sensitive Information", AesEncryptionKey.Create(TripleDesEncryptionKey.Create()));
+            Keyring.GlobalKeyring.Add("Semi-Sensitive Information", AesEncryptionKey.Create());
+            Keyring.GlobalKeyring.Add("Non-Sensitive Information", TripleDesEncryptionKey.Create());
+
             // Start Client
             var channelFactory = new ChannelFactory<IService>(new BasicHttpBinding());
             var endpoint = new EndpointAddress(Url);
             var serviceObject = channelFactory.CreateChannel(endpoint);
-            
+
             var patients = GetPatients();
             for (int i = 0; i < patients.Count; i++)
             {
@@ -38,10 +61,16 @@ namespace CryptInject.WcfExample
             }
 
             var rng = new Random((int)DateTime.Now.Ticks);
-            var patient = serviceObject.GetValue(rng.Next(0, patients.Count - 1));
+            var patientIdx = rng.Next(0, patients.Count - 1);
+
+            Console.WriteLine();
+            Console.WriteLine("Requesting name from index {0}: {1}", patientIdx, serviceObject.ServerGetName(patientIdx));
+            Console.WriteLine();
+
+            var patient = serviceObject.GetValue(patientIdx);
             Console.WriteLine("Got back {0} {1} from server.", patient.FirstName, patient.LastName);
 
-            Console.WriteLine("Press [ENTER] to quit.");
+            Console.WriteLine("Press [ENTER] to quit client.");
             Console.ReadLine();
         }
 

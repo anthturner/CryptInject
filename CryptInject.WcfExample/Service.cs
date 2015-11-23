@@ -18,6 +18,11 @@ namespace CryptInject.WcfExample
             StoredPatients[idx] = value;
         }
 
+        public string ServerGetName(int idx)
+        {
+            return $"'{StoredPatients[idx].FirstName} {StoredPatients[idx].LastName}'";
+        }
+
         public Patient GetValue(int idx)
         {
             if (!StoredPatients.ContainsKey(idx))

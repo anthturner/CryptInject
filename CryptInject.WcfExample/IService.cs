@@ -10,6 +10,9 @@ namespace CryptInject.WcfExample
         void SetValue(int idx, Patient value);
 
         [OperationContract]
+        string ServerGetName(int idx);
+
+        [OperationContract]
         Patient GetValue(int idx);
     }
 }
