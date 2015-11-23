@@ -35,6 +35,6 @@ namespace CryptInject.Tests.TestObjects
     [Serializable]
     public class SubObject
     {
-        public virtual int ChildInteger { get; set; }
+        public int ChildInteger { get; set; }
     }
 }

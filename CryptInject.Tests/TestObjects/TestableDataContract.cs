@@ -18,6 +18,10 @@ namespace CryptInject.Tests.TestObjects
         [DataMember]
         public virtual Guid AesGuid { get; set; }
 
+        [Encryptable("AES")]
+        [DataMember]
+        public virtual SubObject AesObject { get; set; }
+
         [Encryptable("DES")]
         [DataMember]
         public virtual string DesString { get; set; }
@@ -29,6 +33,10 @@ namespace CryptInject.Tests.TestObjects
         [Encryptable("DES")]
         [DataMember]
         public virtual Guid DesGuid { get; set; }
+
+        [Encryptable("DES")]
+        [DataMember]
+        public virtual SubObject DesObject { get; set; }
 
         [Encryptable("AES-DES")]
         [DataMember]
@@ -42,6 +50,10 @@ namespace CryptInject.Tests.TestObjects
         [DataMember]
         public virtual Guid AesDesGuid { get; set; }
 
+        [Encryptable("AES-DES")]
+        [DataMember]
+        public virtual SubObject AesDesObject { get; set; }
+
         public string UnencryptedString { get; set; }
 
         public void Populate()
@@ -49,6 +61,7 @@ namespace CryptInject.Tests.TestObjects
             AesString = DesString = AesDesString = "This encrypted string exists identically for AES, DES, and AES-DES.";
             AesInteger = DesInteger = AesDesInteger = 42;
             AesGuid = DesGuid = AesDesGuid = new Guid(42, 61, 99, 4, 16, 11, 88, 50, 112, 209, 2);
+            AesObject = DesObject = AesDesObject = new SubObject() {ChildInteger = 64};
 
             UnencryptedString = "This string is always unencrypted.";
         }

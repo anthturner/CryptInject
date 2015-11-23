@@ -26,7 +26,7 @@ namespace CryptInject.Tests
             {
                 testStream.Seek(0, SeekOrigin.Begin); // rewind
 
-                var dc = new DataContractSerializer(typeof(TestableDataContract).GetEncryptedType());
+                var dc = new DataContractSerializer(new TestableDataContract().AsEncrypted().GetType());
                 return (TestableDataContract)dc.ReadObject(testStream);
             },
             GeneratedKeyring
@@ -43,6 +43,12 @@ namespace CryptInject.Tests
 
             // Warmup
             DataWrapperExtensions.GetAllEncryptableTypes(true);
+        }
+
+        [TestCleanup]
+        public void TestCleanup()
+        {
+            CryptInject.Proxy.EncryptedInstanceFactory.InvalidateInstancesTypes();
         }
 
         [TestMethod]

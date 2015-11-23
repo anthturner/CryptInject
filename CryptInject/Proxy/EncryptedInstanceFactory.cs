@@ -31,6 +31,14 @@ namespace CryptInject.Proxy
             return trackedInstance.Reference.Target;
         }
 
+        internal static void InvalidateInstancesTypes()
+        {
+            Types.Clear();
+            Instances.Clear();
+            TypesByProxy.Clear();
+            TypesByOriginal.Clear();
+        }
+
         internal static void AttachInterceptor(object obj, EncryptionProxyConfiguration configuration = null)
         {
             var trackedType = GetTrackedType(obj.GetType());

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
 using CryptInject.Keys;
@@ -19,7 +20,7 @@ namespace CryptInject.Tests
             },
             testString =>
             {
-                return (TestableJson)JsonConvert.DeserializeObject(testString, typeof(TestableJson).GetEncryptedType(), new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto });
+                return (TestableJson)JsonConvert.DeserializeObject(testString, new TestableJson().AsEncrypted().GetType(), new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto });
             },
             GeneratedKeyring
             );
@@ -34,7 +35,14 @@ namespace CryptInject.Tests
             GeneratedKeyring.Add("AES-DES", AesEncryptionKey.Create());
 
             // Warmup
-            DataWrapperExtensions.GetAllEncryptableTypes(true);
+            var types = DataWrapperExtensions.GetAllEncryptableTypes(true);
+            Assert.IsTrue(types.Count > 0);
+        }
+
+        [TestCleanup]
+        public void TestCleanup()
+        {
+            CryptInject.Proxy.EncryptedInstanceFactory.InvalidateInstancesTypes();
         }
 
         [TestMethod]

@@ -14,7 +14,7 @@ namespace CryptInject.Tests
         private Func<TObject, TSerialized> ProfiledSerializationFunction { get; set; }
         private Func<TSerialized, TObject> ProfiledDeserializationFunction { get; set; }
 
-        private static Keyring GeneratedKeyring { get; set; }
+        private Keyring GeneratedKeyring { get; set; }
 
         public ProfiledTestRun(Func<TObject, TSerialized> profiledSerializationFunction, Func<TSerialized, TObject> profiledDeserializationFunction, Keyring keyring)
         {
@@ -79,12 +79,14 @@ namespace CryptInject.Tests
                 var genericInvoke = typeof(Serializer).GetMethod("Deserialize", BindingFlags.Static | BindingFlags.Public).MakeGenericMethod(property.PropertyType);
                 return genericInvoke.Invoke(null, new object[] { new MemoryStream(data) });
             });
-            var instance = Activator.CreateInstance<TObject>();
-            instance.Populate();
+
+            TObject instance;
             if (useEncryption)
-            {
-                return instance.AsEncrypted(configuration: options);
-            }
+                instance = Activator.CreateInstance<TObject>().AsEncrypted(GeneratedKeyring, options);
+            else
+                instance = Activator.CreateInstance<TObject>();
+
+            instance.Populate();
             return instance;
         }
     }

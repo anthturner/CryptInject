@@ -27,7 +27,7 @@ namespace CryptInject.Tests
             testStream =>
             {
                 testStream.Seek(0, SeekOrigin.Begin); // rewind
-                
+
                 var binaryFormatter = new BinaryFormatter();
                 return (TestableBinaryFormatter)binaryFormatter.Deserialize(testStream);
             },
@@ -45,6 +45,12 @@ namespace CryptInject.Tests
 
             // Warmup
             var types = DataWrapperExtensions.GetAllEncryptableTypes(true);
+        }
+
+        [TestCleanup]
+        public void TestCleanup()
+        {
+            CryptInject.Proxy.EncryptedInstanceFactory.InvalidateInstancesTypes();
         }
 
         [TestMethod]
