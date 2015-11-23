@@ -9,15 +9,13 @@ namespace CryptInject.EntityFrameworkExample
     {
         private static void Main(string[] args)
         {
-            //File.Delete("keyring.dat");
+            File.Delete("keyring.dat");
             if (!File.Exists("keyring.dat"))
             {
                 DataGeneration();
             }
-            else
-            {
-                DataReading();
-            }
+            DataReading();
+            Console.ReadKey();
         }
 
         private static void DataGeneration()
@@ -28,6 +26,7 @@ namespace CryptInject.EntityFrameworkExample
 
             using (var db = new DatabaseContext())
             {
+                db.Patients.RemoveRange(db.Patients);
                 foreach (var dataRow in SampleDataCsv.Split('\n'))
                 {
                     var record = dataRow.Split(',');
@@ -50,18 +49,33 @@ namespace CryptInject.EntityFrameworkExample
                 }
                 db.SaveChanges();
 
-                Keyring.GlobalKeyring.ExportToStream(new FileStream("keyring.dat", FileMode.OpenOrCreate));
+                using (var keyringStream = new FileStream("keyring.dat", FileMode.OpenOrCreate))
+                {
+                    Keyring.GlobalKeyring.ExportToStream(keyringStream);
+                }
             }
         }
 
         private static void DataReading()
         {
-            Keyring.GlobalKeyring.ImportFromStream(new FileStream("keyring.dat", FileMode.Open));
+            using (var keyringStream = new FileStream("keyring.dat", FileMode.Open))
+            {
+                Keyring.GlobalKeyring.ImportFromStream(keyringStream);
+            }
+            Keyring.GlobalKeyring.Lock();
             using (var db = new DatabaseContext())
             {
+                Console.WriteLine("WHILE KEYRING IS LOCKED:");
                 foreach (var patient in db.Patients)
                 {
+                    Console.WriteLine("{0} {1} - SSN#{2}", patient.FirstName, patient.LastName, patient.SSN);
+                }
 
+                Console.WriteLine("WHILE KEYRING IS UNLOCKED:");
+                Keyring.GlobalKeyring.Unlock();
+                foreach (var patient in db.Patients)
+                {
+                    Console.WriteLine("{0} {1} - SSN#{2}", patient.FirstName, patient.LastName, patient.SSN);
                 }
             }
         }

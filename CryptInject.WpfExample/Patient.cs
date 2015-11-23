@@ -128,7 +128,7 @@ namespace CryptInject.WpfExample
         }
 
         [JsonIgnore]
-        [Encryptable("Restricted")]
+        [Encryptable("Doctor Only")]
         [SerializerRedirect(typeof(JsonPropertyAttribute))]
         public virtual double BMIStored { get; set; }
         [JsonIgnore]

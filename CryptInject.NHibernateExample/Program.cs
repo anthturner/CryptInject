@@ -23,21 +23,25 @@ namespace CryptInject.NHibernateExample
             using (var session = GetSession())
             {
                 List<Patient> patients = new List<Patient>();
-                patients.AddRange(session.Query<Patient>().ToList());
 
-                if (patients.Count == 0)
+                ITransaction transaction;
+                transaction = session.BeginTransaction();
+                foreach (var patient in session.Query<Patient>())
                 {
-                    Keyring.GlobalKeyring.Lock();
-
-                    var transaction = session.BeginTransaction();
-                    foreach (var patient in examplePatients)
-                    {
-                        session.Save(patient);
-                    }
-                    transaction.Commit();
-
-                    patients = session.Query<Patient>().ToList();
+                    session.Delete(patient);
                 }
+                transaction.Commit();
+
+                Keyring.GlobalKeyring.Lock();
+
+                transaction = session.BeginTransaction();
+                foreach (var patient in examplePatients)
+                {
+                    session.Save(patient);
+                }
+                transaction.Commit();
+
+                patients = session.Query<Patient>().ToList();
 
                 Console.WriteLine("WHILE KEYRING IS LOCKED:");
                 foreach (var patient in patients)
