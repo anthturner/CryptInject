@@ -288,6 +288,7 @@
     <Compile Include="Attributes\EncryptableAttribute.cs" />
     <Compile Include="Keys\Programmatic\TimeWindowKey.cs" />
     <Compile Include="Keys\Programmatic\VirtualMachineProhibitedKey.cs" />
+    <Compile Include="ProxyDebugExtensions.cs" />
     <Compile Include="Proxy\CryptInjectHook.cs" />
     <Compile Include="Proxy\EncryptedDataStorageInterceptor.cs" />
     <Compile Include="EncryptionProxyConfiguration.cs" />
