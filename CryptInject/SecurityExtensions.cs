@@ -26,16 +26,16 @@ namespace CryptInject
                     NullProperty(property, obj, i);
             }
 
-            if (property.PropertyType == typeof (string))
-            {
+            //if (property.PropertyType == typeof (string))
+            //{
                 //if (index > -1)
                 //{
                 //    var str = property.GetValue(obj, new object[] {index}) as string;
                 //    str.DestroyString();
                 //}
-            }
-            else
-            {
+            //}
+            //else
+            //{
                 if (index > -1)
                 {
                     property.SetValue(obj, CastToProperty(null, property), new object[] { index });
@@ -44,7 +44,7 @@ namespace CryptInject
                 {
                     property.SetValue(obj, CastToProperty(null, property));
                 }
-            }
+            //}
 
             // todo: config value for turning this on and off
             GC.Collect(GC.MaxGeneration);
