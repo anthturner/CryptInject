@@ -32,6 +32,7 @@ namespace CryptInject.Tests.TestObjects
         }
     }
 
+    [DataContract]
     [Serializable]
     public class SubObject
     {
