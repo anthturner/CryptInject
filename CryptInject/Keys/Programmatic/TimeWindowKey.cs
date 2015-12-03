@@ -10,9 +10,8 @@ namespace CryptInject.Keys.Programmatic
         private KeyAppliesTo AppliesTo { get; set; }
 
         /// <summary>
-        /// Create/Load an encryption key based around AES-256. Key must be 48 bytes in length.
+        /// Create/Load a programmatic key based on a non-recurring time window of availability
         /// </summary>
-        /// <param name="key">Encryption Key (32B) + IV (16B)</param>
         /// <param name="chainedInnerKey">Key operation to run prior to this key</param>
         public TimeWindowKey(DateTime startTime, DateTime endTime, KeyAppliesTo appliesTo = KeyAppliesTo.Both, EncryptionKey chainedInnerKey = null) : base(new byte[0], chainedInnerKey)
         {
@@ -61,20 +60,35 @@ namespace CryptInject.Keys.Programmatic
         {
             get
             {
-                return CreateBinaryFrame(new byte[] { (byte)AppliesTo }, BitConverter.GetBytes(StartTime.Ticks), BitConverter.GetBytes(EndTime.Ticks));
+                return CreateBinaryFrame(
+                    new byte[] {(byte) AppliesTo},
+                    BitConverter.GetBytes(GetUnixEpoch(StartTime)),
+                    BitConverter.GetBytes(GetUnixEpoch(EndTime)));
             }
             set
             {
                 var frame = ExtractBinaryFrame(value);
                 AppliesTo = (KeyAppliesTo) frame[0][0];
-                StartTime = new DateTime(BitConverter.ToInt64(frame[1], 0));
-                EndTime = new DateTime(BitConverter.ToInt64(frame[2], 0));
+                StartTime = GetDateTime(BitConverter.ToInt32(frame[1], 0));
+                EndTime = GetDateTime(BitConverter.ToInt32(frame[2], 0));
             }
         }
 
         protected override bool IsPeriodicallyAccessibleKey()
         {
             return true;
+        }
+
+        private static int GetUnixEpoch(DateTime dateTime)
+        {
+            var unixTime = dateTime.ToUniversalTime() - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            return (int)unixTime.TotalSeconds;
+        }
+
+        private static DateTime GetDateTime(int ctime)
+        {
+            var dateTime = new DateTime(1970, 1, 1);
+            return dateTime.AddSeconds(ctime);
         }
     }
 }

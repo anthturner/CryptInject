@@ -57,8 +57,8 @@ namespace CryptInject.Keys
 
         internal bool IsPeriodicallyAccessibleKey(PropertyInfo property)
         {
-            if (ChainedInnerKey != null)
-                return ChainedInnerKey.IsPeriodicallyAccessibleKey(property);
+            if (ChainedInnerKey != null && ChainedInnerKey.IsPeriodicallyAccessibleKey(property))
+                return true;
             return IsPeriodicallyAccessibleKey();
         }
 
@@ -90,6 +90,11 @@ namespace CryptInject.Keys
                 throw new ObjectDisposedException("Key has been disposed");
             lock (Key)
             {
+                if (Key.Length == 0)
+                {
+                    return new byte[0];
+                }
+
                 var newKey = new byte[Key.Length - Pad];
                 ProtectedMemory.Unprotect(Key, MemoryProtectionScope.SameProcess);
                 Array.ConstrainedCopy(Key, 0, newKey, 0, Key.Length - Pad);

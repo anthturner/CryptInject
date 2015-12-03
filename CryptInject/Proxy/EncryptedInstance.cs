@@ -40,7 +40,7 @@ namespace CryptInject.Proxy
             {
                 cacheValue = property.GetCacheValue(Reference.Target);
                 
-                if (cacheValue == property.Original.GetNullValue())
+                if (cacheValue == property.Original.GetNullValue() || (cacheValue != null && cacheValue.Equals(property.Original.GetNullValue())))
                 {
                     cacheValue = EncryptedType.Configuration.AccessValue(this, property.Original, encryptedValue);
                     property.SetCacheValue(Reference.Target, cacheValue);
@@ -65,7 +65,7 @@ namespace CryptInject.Proxy
                 property.Instantiated.Add(new WeakReference(cacheValue));
             }
 
-            return cacheValue;
+            return cacheValue ?? (cacheValue = property.Original.GetNullValue());
         }
 
         internal void SetValue(string propertyName, object value)

@@ -9,7 +9,7 @@ namespace CryptInject.Keys.Programmatic
         private KeyAppliesTo AppliesTo { get; set; }
 
         /// <summary>
-        /// Create/Load an encryption key based around AES-256. Key must be 48 bytes in length.
+        /// Create/Load a programmatic key to prevent access when operating inside a virtual environment
         /// </summary>
         /// <param name="chainedInnerKey">Key operation to run prior to this key</param>
         public VirtualMachineProhibitedKey(KeyAppliesTo appliesTo = KeyAppliesTo.Both,
