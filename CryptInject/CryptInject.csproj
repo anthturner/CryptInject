@@ -286,6 +286,7 @@
     <Compile Include="Castle\DynamicProxy\Tokens\TypeUtilMethods.cs" />
     <Compile Include="DataWrapperExtensions.cs" />
     <Compile Include="Attributes\EncryptableAttribute.cs" />
+    <Compile Include="Keys\Programmatic\AntiPrintScreenKey.cs" />
     <Compile Include="Keys\Programmatic\TimeWindowKey.cs" />
     <Compile Include="Keys\Programmatic\VirtualMachineProhibitedKey.cs" />
     <Compile Include="ProxyDebugExtensions.cs" />
