@@ -76,12 +76,21 @@ namespace CryptInject.BasicExample
 
             memoryStream.Seek(0, SeekOrigin.Begin); // rewind
 
+            Console.WriteLine();
+            Console.WriteLine("Data Contract: " + System.Text.Encoding.ASCII.GetString(memoryStream.ToArray()));
+            Console.WriteLine();
+
+            memoryStream.Seek(0, SeekOrigin.Begin); // rewind
+
             return (T)dc.ReadObject(memoryStream);
         }
 
         private static T TestJsonSerializer<T>(T obj)
         {
             var jsonStr = JsonConvert.SerializeObject(obj, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto });
+            Console.WriteLine();
+            Console.WriteLine("JSON: " + jsonStr);
+            Console.WriteLine();
             return (T)JsonConvert.DeserializeObject(jsonStr, typeof(DataObjectInstance).GetEncryptedType(), new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto });
         }
     }

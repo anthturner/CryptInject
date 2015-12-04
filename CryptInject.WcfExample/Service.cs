@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ServiceModel;
 
 namespace CryptInject.WcfExample
@@ -20,11 +21,13 @@ namespace CryptInject.WcfExample
 
         public string ServerGetName(int idx)
         {
+            Console.WriteLine("Client requested patient's name from index {0}: '{1} {2}'", idx, StoredPatients[idx].FirstName, StoredPatients[idx].LastName);
             return $"'{StoredPatients[idx].FirstName} {StoredPatients[idx].LastName}'";
         }
 
         public Patient GetValue(int idx)
         {
+            Console.WriteLine("Client requested entire patient record from index {0}", idx);
             if (!StoredPatients.ContainsKey(idx))
                 return null;
             return StoredPatients[idx];
