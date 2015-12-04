@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace CryptInject.Proxy
@@ -90,7 +89,9 @@ namespace CryptInject.Proxy
                 //    field = typeBuilder.DefineField("_" + piName, propertyType, new Type[] { typeof(IsVolatile) }, Type.EmptyTypes, FieldAttributes.Private);
                 //else
                     field = typeBuilder.DefineField("_" + piName, propertyType, FieldAttributes.Private);
-
+                                
+                typeBuilder.DefineField(CACHE_PROPERTY_PREFIX + piName, propertyType, FieldAttributes.Private);
+                
                 MethodInfo getMethod = pi.GetGetMethod();
                 if (getMethod != null)
                 {
@@ -160,19 +161,19 @@ namespace CryptInject.Proxy
 
                 //if (!property.PropertyType.IsValueType && property.PropertyType != typeof(string))
                 //{
-                    var cacheProperty = typeBuilder.DefineProperty(CACHE_PROPERTY_PREFIX + property.Name,
-                        PropertyAttributes.None, property.PropertyType, null);
-                    var newCachePropertyGet = typeBuilder.DefineMethod("get_" + cacheProperty.Name,
-                        MethodAttributes.Abstract | MethodAttributes.Virtual | MethodAttributes.Public |
-                        MethodAttributes.SpecialName, property.PropertyType, Type.EmptyTypes);
-                    var newCachePropertySet = typeBuilder.DefineMethod("set_" + cacheProperty.Name,
-                        MethodAttributes.Abstract | MethodAttributes.Virtual | MethodAttributes.Public |
-                        MethodAttributes.SpecialName, null, new Type[] { property.PropertyType });
+                    //var cacheProperty = typeBuilder.DefineProperty(CACHE_PROPERTY_PREFIX + property.Name,
+                    //    PropertyAttributes.None, property.PropertyType, null);
+                    //var newCachePropertyGet = typeBuilder.DefineMethod("get_" + cacheProperty.Name,
+                    //    MethodAttributes.Abstract | MethodAttributes.Virtual | MethodAttributes.Public |
+                    //    MethodAttributes.SpecialName, property.PropertyType, Type.EmptyTypes);
+                    //var newCachePropertySet = typeBuilder.DefineMethod("set_" + cacheProperty.Name,
+                    //    MethodAttributes.Abstract | MethodAttributes.Virtual | MethodAttributes.Public |
+                    //    MethodAttributes.SpecialName, null, new Type[] { property.PropertyType });
 
-                    if (copyPropertyAttributes)
-                        CopyProperties(property, cacheProperty);
-                    cacheProperty.SetGetMethod(newCachePropertyGet);
-                    cacheProperty.SetSetMethod(newCachePropertySet);
+                    //if (copyPropertyAttributes)
+                    //    CopyProperties(property, cacheProperty);
+                    //cacheProperty.SetGetMethod(newCachePropertyGet);
+                    //cacheProperty.SetSetMethod(newCachePropertySet);
                 //}
             }
 

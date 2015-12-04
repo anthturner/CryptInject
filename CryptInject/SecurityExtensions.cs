@@ -17,6 +17,13 @@ namespace CryptInject
                 NullProperty(propertyInfo, obj);
         }
 
+        internal static void NullField<T>(this T obj, string fieldName)
+        {
+            var fieldInfo = typeof(T).GetField(fieldName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            if (fieldInfo != null)
+                NullField(fieldInfo, obj);
+        }
+
         internal static void NullProperty<T>(this PropertyInfo property, T obj, int index = -1)
         {
             if (property.PropertyType.IsArray && index == -1)
@@ -26,25 +33,33 @@ namespace CryptInject
                     NullProperty(property, obj, i);
             }
 
-            //if (property.PropertyType == typeof (string))
-            //{
-                //if (index > -1)
-                //{
-                //    var str = property.GetValue(obj, new object[] {index}) as string;
-                //    str.DestroyString();
-                //}
-            //}
-            //else
-            //{
-                if (index > -1)
+            if (index > -1)
+            {
+                property.SetValue(obj, CastToProperty(null, property), new object[] { index });
+            }
+            else
+            {
+                property.SetValue(obj, CastToProperty(null, property));
+            }
+
+            // todo: config value for turning this on and off
+            GC.Collect(GC.MaxGeneration);
+            GC.WaitForPendingFinalizers();
+        }
+
+        internal static void NullField<T>(this FieldInfo field, T obj)
+        {
+            if (field.FieldType.IsArray)
+            {
+                var array = (Array)field.GetValue(obj);
+                var arrayLen = ((Array)field.GetValue(obj)).Length;
+                for (var i = 0; i < arrayLen; i++)
                 {
-                    property.SetValue(obj, CastToProperty(null, property), new object[] { index });
+                    array.SetValue(CastToType(null, array.GetValue(i).GetType()), i);
                 }
-                else
-                {
-                    property.SetValue(obj, CastToProperty(null, property));
-                }
-            //}
+            }
+            
+            field.SetValue(obj, CastToField(null, field));
 
             // todo: config value for turning this on and off
             GC.Collect(GC.MaxGeneration);
@@ -53,10 +68,20 @@ namespace CryptInject
 
         internal static object CastToProperty(this object value, PropertyInfo property)
         {
+            return CastToType(value, property.PropertyType);
+        }
+
+        internal static object CastToField(this object value, FieldInfo field)
+        {
+            return CastToType(value, field.FieldType);
+        }
+
+        internal static object CastToType(this object value, Type type)
+        {
             if (value == null)
             {
-                if (property.PropertyType.IsValueType)
-                    return Activator.CreateInstance(property.PropertyType);
+                if (type.IsValueType)
+                    return Activator.CreateInstance(type);
                 else
                     return null;
             }
