@@ -28,7 +28,7 @@ namespace CryptInject
 
                 sb.AppendFormat("Stored Value: {0}\n", prop.Value.GetBackingValue(obj));
 
-                sb.AppendFormat("Cache Type: {0}\n", prop.Value.Cache != null ? prop.Value.Cache.PropertyType.FullName : "<none>");
+                sb.AppendFormat("Cache Type: {0}\n", prop.Value.Cache != null ? prop.Value.Cache.FieldType.FullName : "<none>");
                 sb.AppendFormat("Cache Value: {0}\n", prop.Value.GetBackingValue(obj));
 
                 sb.AppendLine();
