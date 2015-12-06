@@ -16,23 +16,16 @@ namespace CryptInject.Keys.Programmatic
         public AntiPrintScreenKey(KeyAppliesTo appliesTo = KeyAppliesTo.Both, EncryptionKey chainedInnerKey = null) : base(new byte[0], chainedInnerKey)
         {
             AppliesTo = appliesTo;
-            ActiveWindows = new List<IntPtr>();
         }
 
         public AntiPrintScreenKey() : base(new byte[0], null)
         {
-            ActiveWindows = new List<IntPtr>();
         }
 
         ~AntiPrintScreenKey()
         {
             ShowAllWindows();
         }
-
-        /// <summary>
-        /// Window pointers for all windows that will have their affinities changed to make print screen more difficult
-        /// </summary>
-        public List<IntPtr> ActiveWindows { get; }
 
         protected override byte[] Encrypt(PropertyInfo property, byte[] key, byte[] bytes)
         {
@@ -75,8 +68,7 @@ namespace CryptInject.Keys.Programmatic
         {
             if (Environment.OSVersion.Version.Major >= 6 && Environment.OSVersion.Version.Minor >= 1)
             {
-                foreach (var wnd in ActiveWindows)
-                    SetWindowDisplayAffinity(wnd, 0);
+                SecurityExtensions.RunOnAllDataDisplayWindows(ptr => SetWindowDisplayAffinity(ptr, 1));
                 return true;
             }
             return false;
@@ -86,8 +78,7 @@ namespace CryptInject.Keys.Programmatic
         {
             if (Environment.OSVersion.Version.Major >= 6 && Environment.OSVersion.Version.Minor >= 1)
             {
-                foreach (var wnd in ActiveWindows)
-                    SetWindowDisplayAffinity(wnd, 1);
+                SecurityExtensions.RunOnAllDataDisplayWindows(ptr => SetWindowDisplayAffinity(ptr, 0));
                 return true;
             }
             return false;

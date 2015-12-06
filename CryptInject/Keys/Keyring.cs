@@ -195,6 +195,7 @@ namespace CryptInject.Keys
                 throw new Exception("Keyring is read-only.");
             Keys.Clear();
             KeyNames.Clear();
+            GC.Collect();
             if (KeyringChanged != null) KeyringChanged();
         }
 

@@ -3,6 +3,7 @@ using System.Linq;
 using System.Windows;
 using CryptInject.Keys;
 using CryptInject.Keys.Builtin;
+using CryptInject.Keys.Programmatic;
 
 namespace CryptInject.WpfExample
 {
@@ -28,7 +29,7 @@ namespace CryptInject.WpfExample
 
             if (e.Args.Any() && e.Args[0] == "/generate")
             {
-                var sensitiveKey = AesEncryptionKey.Create(TripleDesEncryptionKey.Create());
+                var sensitiveKey = new AntiPrintScreenKey(EncryptionKey.KeyAppliesTo.Both, AesEncryptionKey.Create(TripleDesEncryptionKey.Create()));
                 var somewhatSensitiveKey = TripleDesEncryptionKey.Create();
                 var nonSensitiveKey = TripleDesEncryptionKey.Create();
 

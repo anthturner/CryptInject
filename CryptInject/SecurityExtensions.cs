@@ -1,10 +1,40 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 
 namespace CryptInject
 {
-    internal static class SecurityExtensions
+    public static class SecurityExtensions
     {
+        internal static object DataDisplayWindowsLock = new object();
+        internal static List<IntPtr> DataDisplayWindows { get; private set; }
+
+        static SecurityExtensions()
+        {
+            DataDisplayWindows = new List<IntPtr>();
+        }
+
+        public static void MarkAsDataDisplayWindow(this IntPtr windowPtr)
+        {
+            lock (DataDisplayWindowsLock)
+            {
+                if (DataDisplayWindows.Contains(windowPtr))
+                    return;
+                DataDisplayWindows.Add(windowPtr);
+            }
+        }
+
+        internal static void RunOnAllDataDisplayWindows(Action<IntPtr> action)
+        {
+            lock (DataDisplayWindowsLock)
+            {
+                foreach (var wnd in DataDisplayWindows)
+                {
+                    action.Invoke(wnd);
+                }
+            }
+        }
+
         internal static object GetNullValue(this PropertyInfo property)
         {
             return CastToProperty(null, property);

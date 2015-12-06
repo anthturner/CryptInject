@@ -14,6 +14,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
@@ -39,12 +40,13 @@ namespace CryptInject.WpfExample
             InitializeComponent();
             DataContext = this;
             patientList.ItemsSource = Patients;
-            
+
             Loaded += OnLoaded;
         }
 
         private void OnLoaded(object sender, RoutedEventArgs routedEventArgs)
         {
+            new WindowInteropHelper(this).Handle.MarkAsDataDisplayWindow();
             SetLoggedOut();
             Keyring.GlobalKeyring.KeyringChanged += () => patientList.Dispatcher.Invoke(() =>
             {
