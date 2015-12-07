@@ -16,42 +16,27 @@ namespace CryptInject.BasicExample
             Keyring.GlobalKeyring.Add("Sensitive Information", AesEncryptionKey.Create(TripleDesEncryptionKey.Create()));
             Keyring.GlobalKeyring.Add("Semi-Sensitive Information", TripleDesEncryptionKey.Create());
             Keyring.GlobalKeyring.Add("Non-Sensitive Information", TripleDesEncryptionKey.Create());
+            
 
-            using (var keyringExportStream = new FileStream("keyring.dat", FileMode.Create))
-            {
-                // Export only 2 of the 3 keys we created, for example...
-                Keyring.GlobalKeyring.ExportToStream(keyringExportStream, "Non-Sensitive Information", "Semi-Sensitive Information");
-            }
+            // Create new instances of types to encrypt and fill them with something
+            var encryptedObjBinaryFormatter = new SampleObjectBinaryFormatter().AsEncrypted();
+            var encryptedObjDataContract = new SampleObjectDataContract().AsEncrypted();
+            var encryptedObjJson = new SampleObjectJson().AsEncrypted();
 
-            using (var keyringImportStream = new FileStream("keyring.dat", FileMode.Open))
-            {
-                Keyring.GlobalKeyring.ImportFromStream(keyringImportStream);
-            }
+            encryptedObjBinaryFormatter.Integer = encryptedObjDataContract.Integer = encryptedObjJson.Integer = 12;
+            encryptedObjBinaryFormatter.String = encryptedObjDataContract.String = encryptedObjJson.String = "abc";
 
-            // Create a new instance of the object you're serializing (class for this is below)
-            var proxy = new DataObjectInstance().AsEncrypted();
-            var proxyDc = new DataObjectInstanceContract().AsEncrypted();
-            proxy.Integer = 12;
-            proxy.String = "abc";
+            Console.WriteLine("Before serialize: " + encryptedObjBinaryFormatter.Integer + ", '" + encryptedObjBinaryFormatter.String + "'");
 
-            // Do the same for the DataContract-annotated type
-            proxyDc.Integer = 12;
-            proxyDc.String = "abc";
 
-            Console.WriteLine("Before lock: " + proxy.Integer + ", '" + proxy.String + "'");
-
-            // Lock out access to all keys (and clear cached values)
-            Keyring.GlobalKeyring.Lock();
-
-            var bfProxy = TestBinaryFormatter(proxy);
-            var dcProxy = TestDataContractSerializer(proxyDc);
-            var jsonProxy = TestJsonSerializer(proxy);
-
-            Console.WriteLine("Before unlock: " + proxy.Integer + ", '" + proxy.String + "'");
-            Keyring.GlobalKeyring.Unlock();
-            Console.WriteLine("After unlock (BinaryFormatter): " + bfProxy.Integer + ", '" + bfProxy.String + "'");
-            Console.WriteLine("After unlock (DataContract): " + dcProxy.Integer + ", '" + dcProxy.String + "'");
-            Console.WriteLine("After unlock (JSON): " + jsonProxy.Integer + ", '" + jsonProxy.String + "'");
+            // Serialize using each of the 3 mainstream serializers
+            var bfProxy = TestBinaryFormatter(encryptedObjBinaryFormatter);
+            var dcProxy = TestDataContractSerializer(encryptedObjDataContract);
+            var jsonProxy = TestJsonSerializer(encryptedObjJson);
+            
+            Console.WriteLine("After deserialize (BinaryFormatter): " + bfProxy.Integer + ", '" + bfProxy.String + "'");
+            Console.WriteLine("After deserialize (DataContract): " + dcProxy.Integer + ", '" + dcProxy.String + "'");
+            Console.WriteLine("After deserialize (JSON): " + jsonProxy.Integer + ", '" + jsonProxy.String + "'");
 
             Console.ReadLine();
         }
@@ -91,7 +76,7 @@ namespace CryptInject.BasicExample
             Console.WriteLine();
             Console.WriteLine("JSON: " + jsonStr);
             Console.WriteLine();
-            return (T)JsonConvert.DeserializeObject(jsonStr, typeof(DataObjectInstance).GetEncryptedType(), new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto });
+            return (T)JsonConvert.DeserializeObject(jsonStr, typeof(T).GetEncryptedType(), new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto });
         }
     }
 }

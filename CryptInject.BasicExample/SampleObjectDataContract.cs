@@ -4,7 +4,7 @@ namespace CryptInject.BasicExample
 {
     [DataContract]
     [SerializerRedirect(typeof(DataContractAttribute))]
-    public class DataObjectInstanceContract
+    public class SampleObjectDataContract
     {
         [SerializerRedirect(typeof(DataMemberAttribute))]
         [Encryptable("Sensitive Information")]

@@ -45,10 +45,11 @@
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DataObjectInstanceContract.cs" />
-    <Compile Include="DataObjectInstance.cs" />
+    <Compile Include="SampleObjectDataContract.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SampleObjectJson.cs" />
+    <Compile Include="SampleObjectBinaryFormatter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

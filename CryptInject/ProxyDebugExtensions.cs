@@ -19,18 +19,10 @@ namespace CryptInject
             var properties = Proxy.EncryptedInstanceFactory.GetTrackedTypeByEncrypted(obj.GetType()).Properties;
             foreach (var prop in properties)
             {
-                sb.AppendFormat("Property: {0}\n", prop.Key);
-                sb.AppendFormat("Property Type: {0}\n", prop.Value.Original.PropertyType.FullName);
-                sb.AppendFormat("Key Alias: {0}\n", prop.Value.KeyAlias);
-
-                var localKeyring = prop.Value.GetLocalKeyring();
-                sb.AppendFormat("Local Keyring Provides: {0}\n", string.Join(", ", localKeyring.KeysProvided));
-
-                sb.AppendFormat("Stored Value: {0}\n", prop.Value.GetBackingValue(obj));
-
-                sb.AppendFormat("Cache Type: {0}\n", prop.Value.Cache != null ? prop.Value.Cache.FieldType.FullName : "<none>");
-                sb.AppendFormat("Cache Value: {0}\n", prop.Value.GetBackingValue(obj));
-
+                sb.AppendFormat("\tProperty: {0}\t ({1})\n", prop.Key, prop.Value.Original.PropertyType.FullName);
+                sb.AppendFormat("\tRequired Key Alias: {0}\n", prop.Value.KeyAlias);
+                sb.AppendFormat("\tStored Value: {0}\n", BitConverter.ToString(prop.Value.GetBackingValue(obj)));
+                
                 sb.AppendLine();
             }
 
