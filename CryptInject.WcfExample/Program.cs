@@ -56,7 +56,7 @@ namespace CryptInject.WcfExample
             var patients = GetPatients();
             for (int i = 0; i < patients.Count; i++)
             {
-                Console.WriteLine("Sending {0} {1} to server.", patients[i].FirstName, patients[i].LastName);
+                Console.WriteLine("[{0}] Sending {1} {2} to server.", i, patients[i].FirstName, patients[i].LastName);
                 serviceObject.SetValue(i, patients[i]);
             }
 
